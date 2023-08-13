@@ -28,7 +28,7 @@ This is a fork of [V-Py/svelte-kanban](https://github.com/V-Py/svelte-kanban). P
 ## Installation
 
 ```sh
-npm i svelte-kanban
+npm i @goodware/svelte-kanban
 ```
 
 ## Usage
