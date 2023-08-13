@@ -1,3 +1,7 @@
+# Svelte-Kanban
+
+This is a fork of [V-Py/svelte-kanban](https://github.com/V-Py/svelte-kanban). PRs have been submitted to it but the project seems to be dormant. There are no feature changes in this fork but the code has been updated to the Svelte 4 era.
+
 <h1 align="center">
   <img src="https://raw.githubusercontent.com/V-Py/svelte-kanban/master/src/kanbanicon.png" alt="Svelte Kanban" height=60>
   <br>&ensp;Svelte Kanban
@@ -20,6 +24,7 @@
 
 <img src="https://raw.githubusercontent.com/V-Py/svelte-kanban/master/static/kanbancapture.PNG" alt="Svelte Kanban">
 <slot />
+
 ## Installation
 
 ```sh
