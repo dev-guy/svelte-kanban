@@ -1,6 +1,6 @@
 {
-	"name": "svelte-kanban",
-	"version": "0.0.953",
+	"name": "@goodware/svelte-kanban",
+	"version": "1.0.0-beta.0",
 	"scripts": {
 		"build": "vite build && npm run package",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
@@ -11,22 +11,22 @@
 		"package": "svelte-kit sync && svelte-package && publint",
 		"prepublishOnly": "npm run package",
 		"preview": "vite preview",
-		"pub": "npm publish --access=public",
+		"pub": "npm run build && npm publish --access=public",
 		"test": "npm run test:integration && npm run test:unit",
 		"test:integration": "playwright test",
 		"test:unit": "vitest"
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/V-Py/svelte-kanban"
+		"url": "https://github.com/good-ware/svelte-kanban"
 	},
 	"bugs": {
-		"url": "https://github.com/V-Py/svelte-kanban/issues"
+		"url": "https://github.com/good-ware/svelte-kanban/issues"
 	},
 	"author": {
-		"name": "Valentin Py",
-		"email": "valentin.pyb@gmail.com",
-		"url": "https://github.com/V-Py"
+		"name": "devguy",
+		"email": "devguy@devguy.com",
+		"url": "https://github.com/dev-guy"
 	},
 	"keywords": [
 		"svelte",
