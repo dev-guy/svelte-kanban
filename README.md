@@ -16,8 +16,6 @@ This is a fork of [V-Py/svelte-kanban](https://github.com/V-Py/svelte-kanban). P
 
 <div class="hide-in-docs">
 
-**[Live demo](https://kanban-demo.vercel.app/)**.
-
 </div>
 
 **A simple Svelte Kanban made in pure CSS**
