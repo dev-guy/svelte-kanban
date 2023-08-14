@@ -1,7 +1,6 @@
 {
 	"name": "@goodware/svelte-kanban",
 	"version": "1.0.0",
-	"name": "svelte-kanban",
 	"engines": {
 		"node": ">=16.14"
 	},
