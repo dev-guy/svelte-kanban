@@ -1,6 +1,10 @@
 {
 	"name": "@goodware/svelte-kanban",
 	"version": "1.0.0",
+	"name": "svelte-kanban",
+	"engines": {
+		"node": ">=16.14"
+	},
 	"scripts": {
 		"build": "vite build && npm run package",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
