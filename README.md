@@ -3,7 +3,7 @@
 This is a fork of [V-Py/svelte-kanban](https://github.com/V-Py/svelte-kanban). PRs have been submitted to it but the project seems to be dormant. There are no feature changes in this fork but the code has been updated to the Svelte 4 era.
 
 <h1 align="center">
-  <img src="https://raw.githubusercontent.com/V-Py/svelte-kanban/master/src/kanbanicon.png" alt="Svelte Kanban" height=60>
+  <img src="https://raw.githubusercontent.com/good-ware/svelte-kanban/master/src/kanbanicon.png" alt="Svelte Kanban" height=60>
   <br>&ensp;Svelte Kanban
 </h1>
 
@@ -20,20 +20,27 @@ This is a fork of [V-Py/svelte-kanban](https://github.com/V-Py/svelte-kanban). P
 
 **A simple Svelte Kanban made in pure CSS**
 
-<img src="https://raw.githubusercontent.com/V-Py/svelte-kanban/master/static/kanbancapture.PNG" alt="Svelte Kanban">
+<img src="https://raw.githubusercontent.com/goodware/svelte-kanban/master/static/kanbancapture.PNG" alt="Svelte Kanban">
 <slot />
 
 ## Installation
 
 ```sh
 npm i @goodware/svelte-kanban
+npm i --save-dev svelte svelte-preprocess sass
+```
+
+This is beyond the scope of this guide, but your build system (Vite, ESBuild, etc.) should use the `svelte-preprocess` plugin:
+
+```js
+  preprocess: sveltePreprocess()
 ```
 
 ## Usage
 
 ```svelte
 <script>
-	import Kanban from 'svelte-kanban';
+	import Kanban from '@goodware/svelte-kanban';
 </script>
 
 <div style="width:100%; height:100%;">
@@ -106,8 +113,6 @@ Full list of props/bindable variables for this component:
 ## Dev Mode
 
 ```sh
-git clone https://github.com/V-Py/svelte-kanban
-cd svelte-kanban
 npm install
 npm run dev
 ```
