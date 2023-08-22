@@ -26,11 +26,14 @@ This is a fork of [V-Py/svelte-kanban](https://github.com/V-Py/svelte-kanban). P
 ## Installation
 
 ```sh
-npm i @goodware/svelte-kanban
-npm i --save-dev svelte svelte-preprocess sass
+npm i --save @goodware/svelte-kanban
 ```
 
 This is beyond the scope of this guide, but your build system (Vite, ESBuild, etc.) should use the `svelte-preprocess` plugin:
+
+```sh
+npm i --save-dev svelte-preprocess sass
+```
 
 ```js
   preprocess: sveltePreprocess()
