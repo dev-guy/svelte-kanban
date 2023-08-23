@@ -6,9 +6,9 @@
     const dispatch = createEventDispatcher();
 
     function removeCard(e){
-		const column_temp = $columns[id_col];
+		const column_temp = $columns.columns[id_col];
 		column_temp.slots.splice(id, 1);
-		$columns[id_col].slots = [... column_temp.slots];
+		$columns.columns[id_col].slots = [... column_temp.slots];
         dispatch('cardRemove', {});  
     }
 
@@ -30,13 +30,13 @@
         document.getElementById(modify).style.display = '';
         document.getElementById(input).style.display = 'none';
         document.getElementById(save).style.display = 'none';
-        $columns[id_col].slots[id][prop] = (<HTMLInputElement>document.getElementById(input)).value;
+        $columns.columns[id_col].slots[id][prop] = (<HTMLInputElement>document.getElementById(input)).value;
         dispatch('cardPropSaved', {prop, col:id_col, card:id, value:(<HTMLInputElement>document.getElementById(input)).value});  
     }
  
     function changeCategory(cat_index:number){
-        const oldValue = $columns[id_col].slots[id].category;
-        $columns[id_col].slots[id].category = categories_list[cat_index];
+        const oldValue = $columns.columns[id_col].slots[id].category;
+        $columns.columns[id_col].slots[id].category = categories_list[cat_index];
         bool_show_cats_list = false;
         dispatch('cardPropSaved', {prop:'category', col:id_col, card:id, oldValue, newValue:categories_list[cat_index]}); 
     }

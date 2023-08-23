@@ -43,7 +43,7 @@
     function saveColumn(){
         const input_id = 'input-colum'+index_col;
         const new_title = document.getElementById(input_id).value;
-        $columns[index_col].title = new_title;
+        $columns.columns[index_col].title = new_title;
         bool_show_options = true;
         dispatch('columnSaveTitle', {title:new_title})
     }
