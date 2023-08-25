@@ -7,6 +7,7 @@
 </svelte:head>
 
 <Kanban 
+ theme="dark"
     on:columnSaveTitle
     on:columnRemove
     on:columnAdd

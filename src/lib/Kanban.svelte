@@ -254,6 +254,7 @@
 	}
 
 	function addCard(col_index:number){		
+		console.error('adding card', {col_index, columns:$columns.columns.length})
 		const card_temp = {
  			empty: false,
 			animate: false,
@@ -262,6 +263,7 @@
 			category: categories_list[0],
 			date: new Date().toLocaleString().replace(/,.*/, '')
  		};
+		console.log('add card')
 		$columns.columns[col_index].slots.unshift(card_temp);
         dispatch('cardAdd', {col:col_index, columns:$columns.columns});  
 	}
@@ -289,7 +291,7 @@
 
 		setTimeout(function(){
 			const col_index = $columns.columns.length - 1 ;
-			$columns.columns[col_index].rect = document.getElementsByClassName('column')[col_index].getBoundingClientRect();
+			//$columns.columns[col_index].rect = document.getElementsByClassName('column')[col_index].getBoundingClientRect();
 		}, 200);
 
         dispatch('columnAdd', {position:posAdd, columns:$columns.columns});  	
@@ -322,7 +324,7 @@
 		const columns_temp = document.getElementsByClassName('column');
 		for(let i=0; i<columns_temp.length; i++){
 			const rect_col  =  columns_temp[i].getBoundingClientRect();
-			$columns.columns[i].rect = rect_col;
+			// $columns.columns[i].rect = rect_col;
 		}
 	}
 
@@ -351,7 +353,7 @@
 <div class="kanban {theme}" style:background="{primary}">
 	<div class="layout">
 		<div class="kanban-container">
-			{#each $columns.columns as column, index_col(column)}
+			{#each $columns.columns as column, index_col}
 				<Column
 					{theme}
 					{categories_list}

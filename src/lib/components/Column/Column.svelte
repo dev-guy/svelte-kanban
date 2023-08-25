@@ -10,13 +10,15 @@
 
     export let title;
     export let index_col;
-    export let slots;
     export let show_fake_slot;
     export let categories_list;
     export let theme;
     export let secondary;
     export let fontPrimary;
     export let fontSecondary;
+
+	let slots;
+	$: slots = $columns.columns[index_col].slots;
 
     const dispatch = createEventDispatcher();
 
@@ -79,7 +81,6 @@
     </div>
 
     <div class="content"> 
-        {#if slots.length > 0}
             {#each slots as slot, index}
                 <div class="{slot.animate == true ? 'animate' : ''} not-empty animate">
                     {#if slot.empty == false}
@@ -105,7 +106,6 @@
                     {/if}
                 </div>
             {/each}
-        {/if}
 
     </div>
     <button class="add-card" on:click={() => {dispatch('addCard', {index:index_col});  }} style:color="{fontSecondary}">
