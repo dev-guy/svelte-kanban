@@ -1,12 +1,14 @@
 <script lang="ts">
+	import { setContext } from "svelte";
 	import { onMount, createEventDispatcher } from "svelte";
 	import {flip} from 'svelte/animate';
 	import Column from './components/Column/Column.svelte';
 	import AddColumnBtn from '$lib/components/AddColumnBtn.svelte';
-	import {columns, globalLang} from '$lib/stores/store.js';
+	import {getColumns, globalLang} from '$lib/stores/store.js';
 	import {Lang} from './class/Lang.js';
 
 	const dispatch = createEventDispatcher();
+	const columns = getColumns();
 
 	// Props used for setting up card size / dragNdrop
 	const HEIGHT_CARD_CONTAINER = 120;
@@ -21,9 +23,11 @@
 	export let third 			= null;
 	export let fontPrimary 		= null;
 	export let fontSecondary 	= null;
-	export let lang 			= 'en';
+	export let lang;
 	export let minimalist 		= false;
 	export let maxColumns 		= 5;
+
+	globalLang.set(new Lang(lang));
 
 	const tempLang = new Lang(lang);
 	export let categories_list = [{
@@ -73,7 +77,6 @@
 		$columns.columns.push({
 			title:column.name,
 			coordinates: {x_start:0, x_end:0, y_start:0, y_end:0},
-			rect:{},
 			slots:column.cards || [],
 		});
 	});
@@ -99,12 +102,11 @@
 		card_top_coord.y = rect_card.top;
 
 		// by default the first empty card should take the place of the card dragged
-		// const columns_work = [... $columns.columns];
+		// const columns_work = $columns.columns;
 		// columns_work[dragged_card_infos.col].slots.splice(dragged_card_infos.index, 0, {empty:true});
 		// tracking_last_empty_card.col = dragged_card_infos.col;
 		// tracking_last_empty_card.index = dragged_card_infos.index;
-
-		// $columns.columns = [... columns_work];
+		// $columns = $columns;
 		
 		document.addEventListener('mousemove', cardDragMove);
 		document.addEventListener('mouseup', cardDragEnd);
@@ -126,8 +128,12 @@
 		const x_card_top = card_top_coord.x + x_live; // card_top_coord.y (98) + e.clientY (100) - c0ffY (100)
 		const y_card_top = card_top_coord.y + y_live;
 
-		for(let i=0; i<$columns.columns.length;i++){
-			if((x_card_top >= $columns.columns[i].rect.left) && (x_card_top <= $columns.columns[i].rect.right) && (y_card_top >= $columns.columns[i].rect.top) && (y_card_top <= $columns.columns[i].rect.bottom)){
+		for (let i=0; i<$columns.columns.length;i++){
+			const rect = document.getElementsByClassName('column')[i].getBoundingClientRect();
+			if((x_card_top >= rect.left)
+			  && (x_card_top <= rect.right)
+		      && (y_card_top >= rect.top)
+			  && (y_card_top <= rect.bottom)){
 				let bool_position_order_found = false; // Boolean signaling we found the order position of the card in the column (ie)
 				let position_order = 0; // Position order of the card in the column
 				let j = 1; // variable to increment to navigate between the cards of the column
@@ -157,7 +163,7 @@
 				if(i == dragged_card_infos.col) return;
 
 				// Copying columns
-				const columns_work = [... $columns.columns];
+				const columns_work = $columns.columns;
 
 				// if the last empty is not empty and not the same as the one we are going to add, we need to delete it
 				if(tracking_last_empty_card.col != -1) columns_work[tracking_last_empty_card.col].slots.splice(tracking_last_empty_card.index, 1)
@@ -170,7 +176,8 @@
 
 				if(bool_add_empty) columns_work[i].slots.splice(position_order, 0, {empty:true});
 				tracking_last_empty_card = {col:i, index:position_order};// updating the last empty
-				$columns.columns = [... columns_work];
+
+				$columns = $columns; 
 			}
 		}
 	};
@@ -189,7 +196,12 @@
 		let newPos;
 
 		for(let i=0; i<$columns.columns.length;i++){
-			if((x_card_top >= $columns.columns[i].rect.left) && (x_card_top <= $columns.columns[i].rect.right) && (y_card_top >= $columns.columns[i].rect.top) && (y_card_top <= $columns.columns[i].rect.bottom)){
+			const rect = document.getElementsByClassName('column')[i].getBoundingClientRect();
+
+			if((x_card_top >= rect.left)
+			  && (x_card_top <= rect.right)
+			  && (y_card_top >= rect.top)
+			  && (y_card_top <= rect.bottom)) {
 				let bool_position_order_found = false; // Boolean signaling we found the order position of the card in the column (ie)
 				let position_order = 0; // Position order of the card in the column
 				let j = 1; // variable to increment to navigate between the cards of the column
@@ -212,12 +224,10 @@
 					if(!bool_position_order_found) position_order = $columns.columns[i].slots.length;
 				}
 
-
-
 				const card_temp = $columns.columns[dragged_card_infos.col].slots[dragged_card_infos.index];
 
 				// Copying columns
-				const columns_work = [... $columns.columns];
+				const columns_work = $columns.columns;
 
 				// Removing card from column dragged from
 				columns_work[dragged_card_infos.col].slots.splice(dragged_card_infos.index, 1);
@@ -235,8 +245,10 @@
 
 				// Adding card to column dragged on at the right position
 				
-				columns_work[i].slots.splice(position_order, 0, card_temp);
-				$columns.columns = [... columns_work];
+				columns_work[i].slots.splice(position_order, 0, { ... card_temp });
+				console.log("Card drag end?")
+
+				$columns = $columns;
 				newCol = i;
 				newPos = position_order;
 				bool_drag_success = true;
@@ -254,7 +266,7 @@
 	}
 
 	function addCard(col_index:number){		
-		console.error('adding card', {col_index, columns:$columns.columns.length})
+		console.log('add card')
 		const card_temp = {
  			empty: false,
 			animate: false,
@@ -263,16 +275,16 @@
 			category: categories_list[0],
 			date: new Date().toLocaleString().replace(/,.*/, '')
  		};
-		console.log('add card')
 		$columns.columns[col_index].slots.unshift(card_temp);
+		$columns = $columns;
         dispatch('cardAdd', {col:col_index, columns:$columns.columns});  
 	}
 
 	function removeColumn(event){
-		const columns_temp = [... $columns.columns];
+		const columns_temp = $columns.columns;
 		const name = columns_temp[event.detail.index_col];
 		columns_temp.splice(event.detail.index_col, 1);
-		$columns.columns = [... columns_temp];
+		$columns = $columns;
         dispatch('columnRemove', {position:event.detail.index_col, name, columns:$columns.columns, columns:$columns.columns});  
 	}
 
@@ -288,44 +300,34 @@
 		if($columns.columns.length == maxColumns) return;
 		const posAdd = $columns.columns.length;
 		$columns.columns.push(col_temp);
-
-		setTimeout(function(){
-			const col_index = $columns.columns.length - 1 ;
-			//$columns.columns[col_index].rect = document.getElementsByClassName('column')[col_index].getBoundingClientRect();
-		}, 200);
+		$columns = $columns;
 
         dispatch('columnAdd', {position:posAdd, columns:$columns.columns});  	
 	}
 
 	function moveCardUp(event){
+				console.log("Movecard up")
 		if(event.detail.card == 0 )return;
 		const card = $columns.columns[event.detail.col].slots[event.detail.card]
 		
-		const columns_work = [...$columns.columns];
+		const columns_work = $columns.columns;
 		columns_work[event.detail.col].slots.splice(event.detail.card, 1);
 		columns_work[event.detail.col].slots.splice((event.detail.card-1), 0, card);
-		columns.set(columns_work);
+		$columns = $columns;
         dispatch('moveCardUp', {col:event.detail.col, old_pos:event.detail.card, new_pos:event.detail.card-1, columns:$columns.columns});  	
 	}
 
 	function moveCardDown(event){
 		const numEvents = ($columns.columns[event.detail.col].slots.length -1);
+				console.log("Movecard down")
 		if(event.detail.card == numEvents) return;
 	
 		const card = $columns.columns[event.detail.col].slots[event.detail.card]
-		const columns_work = [...$columns.columns];
+		const columns_work = $columns.columns;
 		columns_work[event.detail.col].slots.splice(event.detail.card, 1);
 		columns_work[event.detail.col].slots.splice((event.detail.card+1), 0, card);
-		columns.set(columns_work);
+		$columns = $columns;
         dispatch('moveCardDown', {col:event.detail.col, old_pos:event.detail.card, new_pos:event.detail.card+1, columns:$columns.columns});  	
-	}
-
-	function handleResize(entries){
-		const columns_temp = document.getElementsByClassName('column');
-		for(let i=0; i<columns_temp.length; i++){
-			const rect_col  =  columns_temp[i].getBoundingClientRect();
-			// $columns.columns[i].rect = rect_col;
-		}
 	}
 
 	function moveColumn(e){
@@ -334,19 +336,18 @@
 		if(direction == 'left' && index == 0) return;
 		if(direction == 'right' && index == ($columns.columns.length-1)) return;
 		const newIndex = index + (direction == 'right' ? 1 : -1);
-		let columns_work = [...$columns.columns];
+		let columns_work = $columns.columns;
 		const col = columns_work[index];
 		columns_work.splice(index,1);
-		columns_work.splice(newIndex, 0, col)
-		columns.set(columns_work);
+		columns_work.splice(newIndex, 0, {...col})
+		$columns.columns = $columns.columns;
 		dispatch('columnMoved', {old_pos:index, new_pos:newIndex});
 	}
 
 	onMount(() => {
-		if(lang) globalLang.set(new Lang(lang)); //
 		// we only need to observe the first column since all the columns have the same size atm
-		let resizer = new ResizeObserver(handleResize)
-		resizer.observe(document.getElementsByClassName('column')[0])
+		// let resizer = new ResizeObserver(handleResize)
+		// resizer.observe(document.getElementsByClassName('column')[0])
 	})
 </script>
 

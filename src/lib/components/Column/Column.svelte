@@ -1,13 +1,15 @@
 <script lang="ts">
-    import {onMount, getContext, createEventDispatcher} from 'svelte';
-    import {columns}        from '$lib/stores/store.js';
+    import {onMount, createEventDispatcher} from 'svelte';
+    import {globalLang, getColumns}     from '$lib/stores/store.js';
     import {fly, scale}     from 'svelte/transition';
     import Card             from '../Card.svelte';
     import OptionsColumn    from'./OptionsColumn.svelte';
-    import {globalLang}     from '$lib/stores/store.js';
 
     let bool_show_options = true;
 
+	console.log('drawing column')
+
+	export let slots;
     export let title;
     export let index_col;
     export let show_fake_slot;
@@ -17,8 +19,7 @@
     export let fontPrimary;
     export let fontSecondary;
 
-	let slots;
-	$: slots = $columns.columns[index_col].slots;
+	const columns = getColumns();
 
     const dispatch = createEventDispatcher();
 

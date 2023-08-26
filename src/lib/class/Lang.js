@@ -1,6 +1,6 @@
 export class Lang {
-	constructor(lang = 'en') {
-		this.lang = lang;
+	constructor(lang) {
+		this.lang = lang || 'en';
 	}
 	getStr(str) {
 		return Lang[this.lang][str];
