@@ -1,8 +1,11 @@
 <script lang="ts">
     import {createEventDispatcher, onMount} from 'svelte';
-    import {getColumns, globalLang} from '$lib/stores/store.js';
+	import {getColumns, getLang} from '$lib/stores/index.ts';
+
+	console.log('creating a card')
 
 	const columns = getColumns();
+	const globalLang = getLang();
 
     let bool_show_cats_list = false;
     const dispatch = createEventDispatcher();
@@ -10,7 +13,7 @@
     function removeCard(e){
 		const column_temp = $columns.columns[id_col];
 		column_temp.slots.splice(id, 1);
-		$columns.columns[id_col].slots = [... column_temp.slots];
+		$columns = $columns;
         dispatch('cardRemove', {});  
     }
 

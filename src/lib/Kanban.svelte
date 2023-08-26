@@ -2,13 +2,11 @@
 	import { setContext } from "svelte";
 	import { onMount, createEventDispatcher } from "svelte";
 	import {flip} from 'svelte/animate';
-	import Column from './components/Column/Column.svelte';
+	import Column from '$lib/components/Column/Column.svelte';
 	import AddColumnBtn from '$lib/components/AddColumnBtn.svelte';
-	import {getColumns, globalLang} from '$lib/stores/store.js';
-	import {Lang} from './class/Lang.js';
+	import {getColumns, getLang} from '$lib/stores/index.ts';
 
 	const dispatch = createEventDispatcher();
-	const columns = getColumns();
 
 	// Props used for setting up card size / dragNdrop
 	const HEIGHT_CARD_CONTAINER = 120;
@@ -17,45 +15,45 @@
 	const REAL_STARTING_POINT_TOP = STARTING_POINT_TOP + HEIGHT_CARD/2; // The first point of reference is the middle of the first card (if there is one)
 
 	// Properties of the Kanban
+	export let lang: string|null = null;
 	export let theme 			= 'light';
 	export let primary 			= null;
 	export let secondary 		= null;
 	export let third 			= null;
 	export let fontPrimary 		= null;
 	export let fontSecondary 	= null;
-	export let lang;
 	export let minimalist 		= false;
 	export let maxColumns 		= 5;
 
-	globalLang.set(new Lang(lang));
+	const columns = getColumns();
+	const globalLang = getLang(lang);
 
-	const tempLang = new Lang(lang);
 	export let categories_list = [{
-            label:tempLang.getStr('new'),
+            label:$globalLang.getStr('new'),
 			color:'white',
             bgColor:"#0A99FF"
         },{   
-            label:tempLang.getStr('important'),
+            label:$globalLang.getStr('important'),
 			color:'white',
             bgColor:"#EA0B38"
         },{
-            label:tempLang.getStr('task'),
+            label:$globalLang.getStr('task'),
 			color:'black',
             bgColor:"#00F5DC"
         },{
-            label:tempLang.getStr('personal'),
+            label:$globalLang.getStr('personal'),
 			color:'white',
             bgColor:"#629387"
         },{
-            label:tempLang.getStr('work'),
+            label:$globalLang.getStr('work'),
 			color:'black',
             bgColor:"#13F644"
 	}];
 	export let colsList = [{
-			name:tempLang.getStr('Todo'),
+			name:$globalLang.getStr('Todo'),
 			cards:[],
 		},{
-			name:tempLang.getStr('Done'), 
+			name:$globalLang.getStr('Done'), 
 			cards:[]
 	}];
 
@@ -106,7 +104,7 @@
 		// columns_work[dragged_card_infos.col].slots.splice(dragged_card_infos.index, 0, {empty:true});
 		// tracking_last_empty_card.col = dragged_card_infos.col;
 		// tracking_last_empty_card.index = dragged_card_infos.index;
-		// $columns = $columns;
+		$columns = $columns;
 		
 		document.addEventListener('mousemove', cardDragMove);
 		document.addEventListener('mouseup', cardDragEnd);
@@ -230,6 +228,8 @@
 				const columns_work = $columns.columns;
 
 				// Removing card from column dragged from
+				const cardCopy = JSON.parse(JSON.stringify(card_temp));
+
 				columns_work[dragged_card_infos.col].slots.splice(dragged_card_infos.index, 1);
 				// console.log('LAST EMPTY CARD', tracking_last_empty_card);
 
@@ -245,7 +245,7 @@
 
 				// Adding card to column dragged on at the right position
 				
-				columns_work[i].slots.splice(position_order, 0, { ... card_temp });
+				columns_work[i].slots.splice(position_order, 0, cardCopy);
 				console.log("Card drag end?")
 
 				$columns = $columns;
@@ -333,14 +333,18 @@
 	function moveColumn(e){
 		const direction = e.detail.direction;
 		const index = e.detail.index;
+		console.log({index})
 		if(direction == 'left' && index == 0) return;
 		if(direction == 'right' && index == ($columns.columns.length-1)) return;
 		const newIndex = index + (direction == 'right' ? 1 : -1);
 		let columns_work = $columns.columns;
-		const col = columns_work[index];
+		const col = JSON.parse(JSON.stringify(columns_work[index]));
+		console.log(JSON.stringify(col))
 		columns_work.splice(index,1);
-		columns_work.splice(newIndex, 0, {...col})
-		$columns.columns = $columns.columns;
+		console.log(JSON.stringify(col))
+		columns_work.splice(newIndex, 0, col)
+		$columns = $columns;
+		console.log('moved')
 		dispatch('columnMoved', {old_pos:index, new_pos:newIndex});
 	}
 

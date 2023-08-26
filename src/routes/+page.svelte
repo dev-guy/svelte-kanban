@@ -6,6 +6,4 @@
 
 </svelte:head>
 
-<Kanban 
-    lang="fr"
-/>
+<Kanban lang="fr"/>

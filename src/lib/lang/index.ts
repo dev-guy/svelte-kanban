@@ -1,12 +1,5 @@
-export class Lang {
-	constructor(lang) {
-		this.lang = lang || 'en';
-	}
-	getStr(str) {
-		return Lang[this.lang][str];
-	}
-}
-Lang.en = {
+const table = {
+en: {
 	Yes: 'Yes',
 	No: 'No',
 	Done: 'Done',
@@ -21,8 +14,8 @@ Lang.en = {
 	personal: 'personal',
 	work: 'work',
 	important: 'important'
-};
-Lang.fr = {
+},
+fr: {
 	Yes: 'Oui',
 	No: 'Non',
 	Done: 'Terminé',
@@ -37,4 +30,19 @@ Lang.fr = {
 	personal: 'personnel',
 	work: 'travail',
 	important: 'important'
-};
+}};
+
+export type LangCode = keyof typeof table;
+type Key = keyof typeof table.en;
+
+export class Lang {
+	lang: LangCode;
+
+	constructor(lang: LangCode) {
+		this.lang = lang;
+	}
+
+	getStr(key: Key) {
+		return table[this.lang][key];
+	}
+}

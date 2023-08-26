@@ -1,9 +1,9 @@
 <script lang="ts">
     import {onMount, createEventDispatcher} from 'svelte';
-    import {globalLang, getColumns}     from '$lib/stores/store.js';
+	import {getColumns, getLang} from '$lib/stores/index.ts';
     import {fly, scale}     from 'svelte/transition';
-    import Card             from '../Card.svelte';
-    import OptionsColumn    from'./OptionsColumn.svelte';
+    import Card             from '$lib/components/Card.svelte';
+    import OptionsColumn    from '$lib/components/Column/OptionsColumn.svelte';
 
     let bool_show_options = true;
 
@@ -20,6 +20,7 @@
     export let fontSecondary;
 
 	const columns = getColumns();
+	const globalLang = getLang();
 
     const dispatch = createEventDispatcher();
 
