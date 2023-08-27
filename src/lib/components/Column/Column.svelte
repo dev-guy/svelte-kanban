@@ -11,7 +11,7 @@
     export let title;
     export let index_col;
     export let show_fake_slot;
-    export let categories_list;
+    export let catsList;
     export let theme;
     export let secondary;
     export let fontPrimary;
@@ -59,7 +59,6 @@
         {:else}
             <input style:color="{fontPrimary}" type="text" id="input-colum{index_col}" class="title-input" value={title} />
         {/if}
-
         <OptionsColumn
             on:removeColumn
             on:modifyColumn={modifyColumnHandler}
@@ -77,7 +76,7 @@
     </div>
 
     <div class="cards-count" style:color="{fontSecondary}">
-        {slots.length} {$globalLang.getStr('Card')}{slots.length>1 ? "s" : ""}
+        {slots.length} {$globalLang.getStr(slots.length>1 ? 'Cards':'Card')}
     </div>
 
     <div class="content"> 
@@ -87,7 +86,7 @@
                         <Card
                             id={index}
                             id_col={index_col}
-                            {categories_list}
+                            {catsList}
                             on:mousedown="{(e) => {handleMouseDown(e, index)}}"
 
                             title={slot.title}

@@ -4,14 +4,6 @@
 	import AddColumnBtn from '$lib/components/AddColumnBtn.svelte';
 	import {getBoard, getLang, useCrdt} from '$lib/stores/index.ts';
 
-	const dispatch = createEventDispatcher();
-
-	// Props used for setting up card size / dragNdrop
-	const HEIGHT_CARD_CONTAINER = 120;
-	const STARTING_POINT_TOP = 98;
-	const HEIGHT_CARD = 105; // 96
-	const REAL_STARTING_POINT_TOP = STARTING_POINT_TOP + HEIGHT_CARD/2; // The first point of reference is the middle of the first card (if there is one)
-
 	// Properties of the Kanban
 	export let lang				= '';
 	export let theme 			= 'light';
@@ -23,10 +15,10 @@
 	export let minimalist 		= false;
 	export let maxColumns 		= 5;
 
-	const board = getBoard();
 	const globalLang = getLang(lang);
 
-	export let categories_list = [{
+	// Default categories
+	export let catsList = [{
             label:$globalLang.getStr('new'),
 			color:'white',
             bgColor:"#0A99FF"
@@ -47,6 +39,8 @@
 			color:'black',
             bgColor:"#13F644"
 	}];
+
+	// Default columns
 	export let colsList = [{
 			name:$globalLang.getStr('Todo'),
 			cards:[],
@@ -54,6 +48,14 @@
 			name:$globalLang.getStr('Done'), 
 			cards:[]
 	}];
+
+	const dispatch = createEventDispatcher();
+
+	// Props used for setting up card size / dragNdrop
+	const HEIGHT_CARD_CONTAINER = 120;
+	const STARTING_POINT_TOP = 98;
+	const HEIGHT_CARD = 105; // 96
+	const REAL_STARTING_POINT_TOP = STARTING_POINT_TOP + HEIGHT_CARD/2; // The first point of reference is the middle of the first card (if there is one)
 
 	// Local property (ie used to track dragNdrop of the cards)
 	let elem_dragged;
@@ -68,6 +70,7 @@
 	// Infos of the card being dragged
 	let dragged_card_infos = {col:-1, index:-1, infos:{}};
 	let tracking_last_empty_card = {col:-1, index:-1};
+	const board = getBoard();
 
 	colsList.forEach(function(column){
 		$board.columns.push({
@@ -269,7 +272,7 @@
 			animate: false,
 			title: $globalLang.getStr('NewCard'),
 			description: $globalLang.getStr('new'),
-			category: categories_list[0],
+			category: catsList[0],
 			date: new Date().toLocaleString().replace(/,.*/, '')
  		};
 		$board.columns[col_index].slots.unshift(card_temp);
@@ -286,7 +289,7 @@
 	}
 
 	function addColumn(){
-		if($board.columns.length >= maxColumns) return;
+		if ($board.columns.length >= maxColumns) return;
 
 		const col_temp = {
 			title:$globalLang.getStr('NewColumn'),
@@ -358,7 +361,7 @@
 			{#each $board.columns as column, index_col}
 				<Column
 					{theme}
-					{categories_list}
+					{catsList}
 					slots={column.slots}
 					title={column.title}
 					{index_col}

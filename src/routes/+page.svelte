@@ -6,4 +6,10 @@
 
 </svelte:head>
 
-<Kanban lang="fr"/>
+<!--
+For an empty board, use:
+
+ <Kanban colsList={[]}/>
+-->
+
+<Kanban lang='fr'/>
