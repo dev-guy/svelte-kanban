@@ -19,7 +19,7 @@ export function getColumns() : Writable<Columns> {
 
 	const store = syncedStore( { columns: [] });
 	obj = svelteSyncedStore(store) as unknown as Writable<Columns>;
-	const rtc = new WebrtcProvider("syncedstore-plain$$$", getYjsDoc(store));
+	const rtc = new WebrtcProvider("syncedstore-plain$$$", getYjsDoc(store), {signaling: ['ws://localhost:4444']});
 	rtc.connect();
 	setContext('web-rtc', rtc);
 
