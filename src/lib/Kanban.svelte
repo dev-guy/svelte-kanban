@@ -1,7 +1,5 @@
 <script lang="ts">
-	import { setContext } from "svelte";
 	import { onMount, createEventDispatcher } from "svelte";
-	import {flip} from 'svelte/animate';
 	import Column from '$lib/components/Column/Column.svelte';
 	import AddColumnBtn from '$lib/components/AddColumnBtn.svelte';
 	import {getColumns, getLang} from '$lib/stores/index.ts';
@@ -15,7 +13,7 @@
 	const REAL_STARTING_POINT_TOP = STARTING_POINT_TOP + HEIGHT_CARD/2; // The first point of reference is the middle of the first card (if there is one)
 
 	// Properties of the Kanban
-	export let lang: string|null = null;
+	export let lang				= '';
 	export let theme 			= 'light';
 	export let primary 			= null;
 	export let secondary 		= null;
@@ -246,7 +244,6 @@
 				// Adding card to column dragged on at the right position
 				
 				columns_work[i].slots.splice(position_order, 0, cardCopy);
-				console.log("Card drag end?")
 
 				$columns = $columns;
 				newCol = i;
@@ -266,7 +263,6 @@
 	}
 
 	function addCard(col_index:number){		
-		console.log('add card')
 		const card_temp = {
  			empty: false,
 			animate: false,
@@ -289,7 +285,6 @@
 	}
 
 	function addColumn(){
-		console.log('adding column')
 		const col_temp = {
 			title:$globalLang.getStr('NewColumn'),
 			coordinates: {x_start:0, x_end:0, y_start:0, y_end:0},
@@ -306,9 +301,8 @@
 	}
 
 	function moveCardUp(event){
-				console.log("Movecard up")
 		if(event.detail.card == 0 )return;
-		const card = $columns.columns[event.detail.col].slots[event.detail.card]
+		const card = JSON.parse(JSON.stringify($columns.columns[event.detail.col].slots[event.detail.card]));
 		
 		const columns_work = $columns.columns;
 		columns_work[event.detail.col].slots.splice(event.detail.card, 1);
@@ -319,10 +313,9 @@
 
 	function moveCardDown(event){
 		const numEvents = ($columns.columns[event.detail.col].slots.length -1);
-				console.log("Movecard down")
 		if(event.detail.card == numEvents) return;
 	
-		const card = $columns.columns[event.detail.col].slots[event.detail.card]
+		const card = JSON.parse(JSON.stringify($columns.columns[event.detail.col].slots[event.detail.card]));
 		const columns_work = $columns.columns;
 		columns_work[event.detail.col].slots.splice(event.detail.card, 1);
 		columns_work[event.detail.col].slots.splice((event.detail.card+1), 0, card);
@@ -333,18 +326,14 @@
 	function moveColumn(e){
 		const direction = e.detail.direction;
 		const index = e.detail.index;
-		console.log({index})
 		if(direction == 'left' && index == 0) return;
 		if(direction == 'right' && index == ($columns.columns.length-1)) return;
 		const newIndex = index + (direction == 'right' ? 1 : -1);
 		let columns_work = $columns.columns;
 		const col = JSON.parse(JSON.stringify(columns_work[index]));
-		console.log(JSON.stringify(col))
 		columns_work.splice(index,1);
-		console.log(JSON.stringify(col))
 		columns_work.splice(newIndex, 0, col)
 		$columns = $columns;
-		console.log('moved')
 		dispatch('columnMoved', {old_pos:index, new_pos:newIndex});
 	}
 

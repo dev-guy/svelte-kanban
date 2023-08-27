@@ -2,8 +2,6 @@
     import {createEventDispatcher, onMount} from 'svelte';
 	import {getColumns, getLang} from '$lib/stores/index.ts';
 
-	console.log('creating a card')
-
 	const columns = getColumns();
 	const globalLang = getLang();
 

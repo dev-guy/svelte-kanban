@@ -1,5 +1,6 @@
-import { syncedStore } from "@syncedstore/core";
+import { syncedStore, getYjsDoc } from "@syncedstore/core";
 import { svelteSyncedStore } from "@syncedstore/svelte";
+import { WebrtcProvider } from "y-webrtc";
 
 import { getContext, setContext } from "svelte";
 import { writable } from 'svelte/store';
@@ -16,8 +17,12 @@ export function getColumns() : Writable<Columns> {
 	let obj: Writable<Columns> = getContext('columns');
 	if (obj) return obj;
 
-	const store = svelteSyncedStore(syncedStore( { columns: [] }));
-	obj = store as unknown as Writable<Columns>;
+	const store = syncedStore( { columns: [] });
+	obj = svelteSyncedStore(store) as unknown as Writable<Columns>;
+	const rtc = new WebrtcProvider("syncedstore-plain$$$", getYjsDoc(store));
+	rtc.connect();
+	setContext('web-rtc', rtc);
+
 	// obj = writable({ columns: [] });
 
 	setContext('columns', obj);

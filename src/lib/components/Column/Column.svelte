@@ -7,8 +7,6 @@
 
     let bool_show_options = true;
 
-	console.log('drawing column')
-
 	export let slots;
     export let title;
     export let index_col;
