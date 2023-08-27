@@ -13,23 +13,25 @@ type Columns = {
 	columns: object[];
 };
 
-export function getColumns() : Writable<Columns> {
-	let obj: Writable<Columns> = getContext('columns');
+export const isCrdt = true;
+
+export function getBoard() : Writable<Columns> {
+	let obj: Writable<Columns> = getContext('board');
 	if (obj) return obj;
 
 	const store = syncedStore( { columns: [] });
 	obj = svelteSyncedStore(store) as unknown as Writable<Columns>;
-	const rtc = new WebrtcProvider("syncedstore-plain$$$", getYjsDoc(store), {signaling: ['ws://localhost:4444']});
+	const rtc = new WebrtcProvider('svelte-kanban', getYjsDoc(store), {signaling: ['ws://localhost:4444']});
 	rtc.connect();
 	setContext('web-rtc', rtc);
 
 	// obj = writable({ columns: [] });
 
-	setContext('columns', obj);
+	setContext('board', obj);
 	return obj;
 }
 
-export function getLang(lang: string|null = null): Writable<Lang> {
+export function getLang(lang: string): Writable<Lang> {
 	let obj: Writable<Lang> = getContext('lang');
 	if (obj) return obj;
 

@@ -1,6 +1,6 @@
 <script lang="ts">
     import {onMount, createEventDispatcher} from 'svelte';
-	import {getColumns, getLang} from '$lib/stores/index.ts';
+	import {getBoard, getLang} from '$lib/stores/index.ts';
     import {fly, scale}     from 'svelte/transition';
     import Card             from '$lib/components/Card.svelte';
     import OptionsColumn    from '$lib/components/Column/OptionsColumn.svelte';
@@ -17,7 +17,7 @@
     export let fontPrimary;
     export let fontSecondary;
 
-	const columns = getColumns();
+	const board = getBoard();
 	const globalLang = getLang();
 
     const dispatch = createEventDispatcher();
@@ -45,7 +45,7 @@
     function saveColumn(){
         const input_id = 'input-colum'+index_col;
         const new_title = document.getElementById(input_id).value;
-        $columns.columns[index_col].title = new_title;
+        $board.columns[index_col].title = new_title;
         bool_show_options = true;
         dispatch('columnSaveTitle', {title:new_title})
     }

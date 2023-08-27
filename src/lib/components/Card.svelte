@@ -1,17 +1,17 @@
 <script lang="ts">
     import {createEventDispatcher, onMount} from 'svelte';
-	import {getColumns, getLang} from '$lib/stores/index.ts';
+	import {getBoard, getLang} from '$lib/stores/index.ts';
 
-	const columns = getColumns();
+	const board = getBoard();
 	const globalLang = getLang();
 
     let bool_show_cats_list = false;
     const dispatch = createEventDispatcher();
 
     function removeCard(e){
-		const column_temp = $columns.columns[id_col];
+		const column_temp = $board.columns[id_col];
 		column_temp.slots.splice(id, 1);
-		$columns = $columns;
+		$board = $board;
         dispatch('cardRemove', {});  
     }
 
@@ -33,13 +33,13 @@
         document.getElementById(modify).style.display = '';
         document.getElementById(input).style.display = 'none';
         document.getElementById(save).style.display = 'none';
-        $columns.columns[id_col].slots[id][prop] = (<HTMLInputElement>document.getElementById(input)).value;
+        $board.columns[id_col].slots[id][prop] = (<HTMLInputElement>document.getElementById(input)).value;
         dispatch('cardPropSaved', {prop, col:id_col, card:id, value:(<HTMLInputElement>document.getElementById(input)).value});  
     }
  
     function changeCategory(cat_index:number){
-        const oldValue = $columns.columns[id_col].slots[id].category;
-        $columns.columns[id_col].slots[id].category = categories_list[cat_index];
+        const oldValue = $board.columns[id_col].slots[id].category;
+        $board.columns[id_col].slots[id].category = categories_list[cat_index];
         bool_show_cats_list = false;
         dispatch('cardPropSaved', {prop:'category', col:id_col, card:id, oldValue, newValue:categories_list[cat_index]}); 
     }
