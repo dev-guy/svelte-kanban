@@ -2,7 +2,7 @@
 	import { onMount, createEventDispatcher } from "svelte";
 	import Column from '$lib/components/Column/Column.svelte';
 	import AddColumnBtn from '$lib/components/AddColumnBtn.svelte';
-	import {getBoard, getLang, isCrdt} from '$lib/stores/index.ts';
+	import {getBoard, getLang, useCrdt} from '$lib/stores/index.ts';
 
 	const dispatch = createEventDispatcher();
 
@@ -225,7 +225,7 @@
 
 				// Removing card from column dragged from
 				let card = $board.columns[dragged_card_infos.col].slots[dragged_card_infos.index];
-				if (isCrdt) card = JSON.parse(JSON.stringify(card));
+				if (useCrdt) card = JSON.parse(JSON.stringify(card));
 
 				columns_work[dragged_card_infos.col].slots.splice(dragged_card_infos.index, 1);
 				// console.log('LAST EMPTY CARD', tracking_last_empty_card);
@@ -305,7 +305,7 @@
 	function moveCardUp(event){
 		if(event.detail.card == 0 )return;
 		let card = $board.columns[event.detail.col].slots[event.detail.card];
-		if (isCrdt) card = JSON.parse(JSON.stringify(card));
+		if (useCrdt) card = JSON.parse(JSON.stringify(card));
 		
 		const columns_work = $board.columns;
 		columns_work[event.detail.col].slots.splice(event.detail.card, 1);
@@ -319,7 +319,7 @@
 		if(event.detail.card == numEvents) return;
 	
 		let card = $board.columns[event.detail.col].slots[event.detail.card];
-		if (isCrdt) card = JSON.parse(JSON.stringify(card));
+		if (useCrdt) card = JSON.parse(JSON.stringify(card));
 
 		const columns_work = $board.columns;
 		columns_work[event.detail.col].slots.splice(event.detail.card, 1);
@@ -337,7 +337,7 @@
 		let columns_work = $board.columns;
 
 		let col = columns_work[index];
-		if (isCrdt) col = JSON.parse(JSON.stringify(col));
+		if (useCrdt) col = JSON.parse(JSON.stringify(col));
 
 		columns_work.splice(index,1);
 		columns_work.splice(newIndex, 0, col)
