@@ -4,6 +4,7 @@
     import {fly, scale}     from 'svelte/transition';
     import Card             from '$lib/components/Card.svelte';
     import OptionsColumn    from '$lib/components/Column/OptionsColumn.svelte';
+	import { should } from 'vitest';
 
     let bool_show_options = true;
 
@@ -16,6 +17,7 @@
     export let secondary;
     export let fontPrimary;
     export let fontSecondary;
+
 
 	const board = getBoard();
 	const globalLang = getLang();
@@ -76,12 +78,13 @@
     </div>
 
     <div class="cards-count" style:color="{fontSecondary}">
+		{new Date().getMilliseconds()}
         {slots.length} {$globalLang.getStr(slots.length === 1 ? 'Card':'Cards')}
     </div>
 
     <div class="content"> 
-            {#each slots as slot, index}
-                <div class="{slot.animate == true ? 'animate' : ''} not-empty animate">
+            {#each slots as slot, index (slot.uuidx)}
+                <div class="{slot.animate == true ? 'animate' : ''} not-empty">
                     {#if slot.empty == false}
                         <Card
                             id={index}

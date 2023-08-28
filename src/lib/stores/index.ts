@@ -15,7 +15,7 @@ import { svelteSyncedStore } from '@syncedstore/svelte';
 import { WebrtcProvider } from 'y-webrtc';
 // */
 
-import { getContext, setContext } from "svelte";
+import { getContext, setContext } from 'svelte';
 import { writable } from 'svelte/store';
 import type { Writable } from 'svelte/store';
 
@@ -26,7 +26,7 @@ type Columns = {
 	columns: object[];
 };
 
-export function getBoard() : Writable<Columns> {
+export function getBoard(): Writable<Columns> {
 	let obj: Writable<Columns> = getContext('board');
 	if (obj) return obj;
 
@@ -39,12 +39,14 @@ export function getBoard() : Writable<Columns> {
 
 	// ================
 	// When using CRDT:
-	// To enable the webrtc provider, run: PORT=4444 npx y-webrtc server.js 
+	// To enable the webrtc provider, run: PORT=4444 npx y-webrtc server.js
 	// /*
 	if (!useCrdt) throw new Error('useCrdt should be true');
-	const store = syncedStore( { columns: [] });
+	const store = syncedStore({ columns: [] });
 	obj = svelteSyncedStore(store) as unknown as Writable<Columns>;
-	const rtc = new WebrtcProvider('svelte-kanban', getYjsDoc(store), {signaling: ['ws://localhost:4444']});
+	const rtc = new WebrtcProvider('svelte-kanban', getYjsDoc(store), {
+		signaling: ['ws://localhost:4444']
+	});
 	rtc.connect();
 	setContext('web-rtc', rtc);
 	// */
@@ -53,14 +55,14 @@ export function getBoard() : Writable<Columns> {
 	return obj;
 }
 
-export function getLang(lang: string|undefined): Writable<Lang> {
+/**
+ * @param {LangCode} lang?
+ * @returns 
+ */
+export function getLang(lang: LangCode = 'en'): Writable<Lang> {
 	let obj: Writable<Lang> = getContext('lang');
 	if (obj) return obj;
-
-	// typescript wants this to be an if-like statement. Array.includes() will not work.
-	const code: LangCode = (lang !== 'en' && lang !== 'fr') ? 'en' : lang;
-	
-	obj = writable(new Lang(code));
+	obj = writable(new Lang(lang));
 	setContext('lang', obj);
 	return obj;
 }

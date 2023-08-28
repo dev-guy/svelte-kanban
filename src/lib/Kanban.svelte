@@ -3,9 +3,10 @@
 	import Column from '$lib/components/Column/Column.svelte';
 	import AddColumnBtn from '$lib/components/AddColumnBtn.svelte';
 	import {getBoard, getLang, useCrdt} from '$lib/stores/index.ts';
+	import type {LangCode} from '$lib/lang/index.ts';
 
 	// Properties of the Kanban
-	export let lang				= '';
+	export let lang: LangCode	= 'en';
 	export let theme 			= 'light';
 	export let primary 			= null;
 	export let secondary 		= null;
@@ -182,6 +183,9 @@
 	};
 
 	function cardDragEnd(e){
+		let card = $board.columns[dragged_card_infos.col].slots[dragged_card_infos.index];
+		if (!card) return;
+
         dispatch('cardDragEnd', {card:dragged_card_infos.index, col:dragged_card_infos.col, event:e});  
 		let bool_drag_success = false;
 		e = e || window.event;
@@ -227,7 +231,6 @@
 				const columns_work = $board.columns;
 
 				// Removing card from column dragged from
-				let card = $board.columns[dragged_card_infos.col].slots[dragged_card_infos.index];
 				if (useCrdt) card = JSON.parse(JSON.stringify(card));
 
 				columns_work[dragged_card_infos.col].slots.splice(dragged_card_infos.index, 1);
@@ -266,6 +269,9 @@
 		elem_dragged.style.removeProperty('left');
 	}
 
+	let id = 0;
+	function nextid() {return ++id;}
+
 	function addCard(col_index:number){		
 		const card_temp = {
  			empty: false,
@@ -273,7 +279,8 @@
 			title: $globalLang.getStr('NewCard'),
 			description: $globalLang.getStr('new'),
 			category: catsList[0],
-			date: new Date().toLocaleString().replace(/,.*/, '')
+			date: new Date().toLocaleString().replace(/,.*/, ''),
+			uuidx: nextid(),
  		};
 		$board.columns[col_index].slots.unshift(card_temp);
 		$board = $board;
@@ -306,8 +313,10 @@
 	}
 
 	function moveCardUp(event){
-		if(event.detail.card == 0 )return;
+		if(!event.detail.card)return;
+
 		let card = $board.columns[event.detail.col].slots[event.detail.card];
+		if (!card) return;
 		if (useCrdt) card = JSON.parse(JSON.stringify(card));
 		
 		const columns_work = $board.columns;
@@ -322,6 +331,7 @@
 		if(event.detail.card == numEvents) return;
 	
 		let card = $board.columns[event.detail.col].slots[event.detail.card];
+		if (!card) return;
 		if (useCrdt) card = JSON.parse(JSON.stringify(card));
 
 		const columns_work = $board.columns;
@@ -334,12 +344,13 @@
 	function moveColumn(e){
 		const direction = e.detail.direction;
 		const index = e.detail.index;
-		if(direction == 'left' && index == 0) return;
+		if(direction == 'left' && !index) return;
 		if(direction == 'right' && index == ($board.columns.length-1)) return;
 		const newIndex = index + (direction == 'right' ? 1 : -1);
 		let columns_work = $board.columns;
 
 		let col = columns_work[index];
+		if (!col) return;
 		if (useCrdt) col = JSON.parse(JSON.stringify(col));
 
 		columns_work.splice(index,1);

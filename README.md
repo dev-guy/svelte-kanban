@@ -36,7 +36,7 @@ npm i --save-dev svelte-preprocess sass
 ```
 
 ```js
-  preprocess: sveltePreprocess()
+preprocess: sveltePreprocess();
 ```
 
 ## Usage
