@@ -39,6 +39,7 @@ export function getBoard() : Writable<Columns> {
 
 	// ================
 	// When using CRDT:
+	// To enable the webrtc provider, run: PORT=4444 npx y-webrtc server.js 
 	// /*
 	if (!useCrdt) throw new Error('useCrdt should be true');
 	const store = syncedStore( { columns: [] });
@@ -49,7 +50,6 @@ export function getBoard() : Writable<Columns> {
 	// */
 
 	setContext('board', obj);
-
 	return obj;
 }
 
