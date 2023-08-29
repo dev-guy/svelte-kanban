@@ -5,8 +5,8 @@
 // ====================================
 // When using CRDT:
 // Also add the following dependencies:
-// "@syncedstore/core": "0.6.0-alpha.0"
-// "@syncedstore/svelte": "0.6.0-alpha.0"
+// "@syncedstore/core": "0.6.0-alpha.0",
+// "@syncedstore/svelte": "0.6.0-alpha.0",
 // "y-webrtc": "^10.2.5"
 // /*
 export const useCrdt = true;
@@ -57,7 +57,7 @@ export function getBoard(): Writable<Columns> {
 
 /**
  * @param {LangCode} lang?
- * @returns 
+ * @returns
  */
 export function getLang(lang: LangCode = 'en'): Writable<Lang> {
 	let obj: Writable<Lang> = getContext('lang');

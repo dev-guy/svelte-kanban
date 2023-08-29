@@ -8,7 +8,7 @@
 		"build": "vite build && npm run package",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-		"dev": "vite --force",
+		"dev": "vite dev",
 		"format": "prettier --write .",
 		"lint": "prettier --check . && eslint --report-unused-disable-directives .",
 		"package": "svelte-kit sync && svelte-package && publint",
@@ -57,8 +57,8 @@
 		"@sveltejs/adapter-auto": "^2.1.0",
 		"@sveltejs/kit": "^1.23.0",
 		"@sveltejs/package": "^2.2.2",
-		"@typescript-eslint/eslint-plugin": "^6.4.1",
-		"@typescript-eslint/parser": "^6.4.1",
+		"@typescript-eslint/eslint-plugin": "^6.5.0",
+		"@typescript-eslint/parser": "^6.5.0",
 		"eslint": "^8.48.0",
 		"eslint-config-prettier": "^9.0.0",
 		"eslint-plugin-svelte": "^2.33.0",
@@ -74,9 +74,8 @@
 		"vitest": "^0.34.3"
 	},
 	"dependencies": {
-		"@reactivedata/reactive": "0.2.0",
-		"@syncedstore/core": "0.5.2",
-		"@syncedstore/svelte": "0.5.2",
+		"@syncedstore/core": "0.6.0-alpha.0",
+		"@syncedstore/svelte": "0.6.0-alpha.0",
 		"y-webrtc": "^10.2.5"
 	},
 	"type": "module",

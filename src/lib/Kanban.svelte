@@ -230,7 +230,6 @@
 				// Copying columns
 				const columns_work = $board.columns;
 
-				// Removing card from column dragged from
 				if (useCrdt) card = JSON.parse(JSON.stringify(card));
 
 				columns_work[dragged_card_infos.col].slots.splice(dragged_card_infos.index, 1);
@@ -250,6 +249,7 @@
 
 				// Adding card to column dragged on at the right position
 				
+				// Removing card from column dragged from
 				columns_work[i].slots.splice(position_order, 0, card);
 
 				$board = $board;
@@ -269,9 +269,6 @@
 		elem_dragged.style.removeProperty('left');
 	}
 
-	let id = 0;
-	function nextid() {return ++id;}
-
 	function addCard(col_index:number){		
 		const card_temp = {
  			empty: false,
@@ -280,7 +277,6 @@
 			description: $globalLang.getStr('new'),
 			category: catsList[0],
 			date: new Date().toLocaleString().replace(/,.*/, ''),
-			uuidx: nextid(),
  		};
 		$board.columns[col_index].slots.unshift(card_temp);
 		$board = $board;
@@ -292,7 +288,7 @@
 		const name = columns_temp[event.detail.index_col];
 		columns_temp.splice(event.detail.index_col, 1);
 		$board = $board;
-        dispatch('columnRemove', {position:event.detail.index_col, name, columns:$board.columns, columns:$board.columns});  
+        dispatch('columnRemove', {position:event.detail.index_col, name, columns:$board.columns});  
 	}
 
 	function addColumn(){
@@ -317,13 +313,13 @@
 
 		let card = $board.columns[event.detail.col].slots[event.detail.card];
 		if (!card) return;
-		if (useCrdt) card = JSON.parse(JSON.stringify(card));
 		
 		const columns_work = $board.columns;
+		if (useCrdt) card = JSON.parse(JSON.stringify(card));
 		columns_work[event.detail.col].slots.splice(event.detail.card, 1);
 		columns_work[event.detail.col].slots.splice((event.detail.card-1), 0, card);
 		$board = $board;
-        dispatch('moveCardUp', {col:event.detail.col, old_pos:event.detail.card, new_pos:event.detail.card-1, columns:$board.columns});  	
+		dispatch('moveCardUp', {col:event.detail.col, old_pos:event.detail.card, new_pos:event.detail.card-1, columns:$board.columns});
 	}
 
 	function moveCardDown(event){
@@ -332,29 +328,43 @@
 	
 		let card = $board.columns[event.detail.col].slots[event.detail.card];
 		if (!card) return;
-		if (useCrdt) card = JSON.parse(JSON.stringify(card));
 
 		const columns_work = $board.columns;
+		if (useCrdt) card = JSON.parse(JSON.stringify(card));
 		columns_work[event.detail.col].slots.splice(event.detail.card, 1);
 		columns_work[event.detail.col].slots.splice((event.detail.card+1), 0, card);
 		$board = $board;
-        dispatch('moveCardDown', {col:event.detail.col, old_pos:event.detail.card, new_pos:event.detail.card+1, columns:$board.columns});  	
+		dispatch('moveCardDown', {col:event.detail.col, old_pos:event.detail.card, new_pos:event.detail.card+1, columns:$board.columns});  	
 	}
 
 	function moveColumn(e){
-		const direction = e.detail.direction;
+		const direction = e.detail.direction === 'left' ? -1 : 1;
 		const index = e.detail.index;
-		if(direction == 'left' && !index) return;
-		if(direction == 'right' && index == ($board.columns.length-1)) return;
-		const newIndex = index + (direction == 'right' ? 1 : -1);
+
+		const newIndex = index + direction;
+		if (newIndex < 0 || index >= $board.columns.length) return;
+
 		let columns_work = $board.columns;
 
 		let col = columns_work[index];
 		if (!col) return;
+
 		if (useCrdt) col = JSON.parse(JSON.stringify(col));
 
-		columns_work.splice(index,1);
-		columns_work.splice(newIndex, 0, col)
+		if (!useCrdt || direction === 1) {
+			// Remove
+			columns_work.splice(index, 1);
+			// Add
+			columns_work.splice(newIndex, 0, col)
+		} else {
+			// Move left
+			// No idea why syncedStore wants things done in this order
+			// Add
+			columns_work.splice(newIndex, 0, col);
+			// Remove
+			columns_work.splice(index+1, 1);
+		}
+
 		$board = $board;
 		dispatch('columnMoved', {old_pos:index, new_pos:newIndex});
 	}
@@ -369,7 +379,7 @@
 <div class="kanban {theme}" style:background="{primary}">
 	<div class="layout">
 		<div class="kanban-container">
-			{#each $board.columns as column, index_col}
+			{#each $board.columns as column, index_col (index_col)}
 				<Column
 					{theme}
 					{catsList}

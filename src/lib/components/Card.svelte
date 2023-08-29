@@ -90,7 +90,7 @@
         </div>
     </div>
     <div class="card-part" style="justify-content:center;">
-        <button on:click={()=>{modifyProp('title')}} id="modify-title-{id}-col-{id_col}" class="button-title">{title} {new Date().getMilliseconds()}</button>
+        <button on:click={()=>{modifyProp('title')}} id="modify-title-{id}-col-{id_col}" class="button-title">{title}</button>
         <input on:keypress={(e)=> {handleKeyUp(e, 'title')}} id="input-title-{id}-col-{id_col}" value={title} type="text" style="display:none;" class="input-title">
         <button on:click={()=>{saveProp('title')}} id="save-title-{id}-col-{id_col}" style="display:none;right:1rem; top:0.25rem;" class="save-button" >
             <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" class="iconify iconify--mdi" width="15" height="15" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><path d="M15 9H5V5h10m-3 14a3 3 0 0 1-3-3a3 3 0 0 1 3-3a3 3 0 0 1 3 3a3 3 0 0 1-3 3m5-16H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7l-4-4z" fill="currentColor"></path></svg>
