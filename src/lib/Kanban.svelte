@@ -342,7 +342,7 @@
 		const index = e.detail.index;
 
 		const newIndex = index + direction;
-		if (newIndex < 0 || index >= $board.columns.length) return;
+		if (newIndex < 0 || newIndex >= $board.columns.length) return;
 
 		let columns_work = $board.columns;
 
@@ -352,6 +352,7 @@
 		if (useCrdt) col = JSON.parse(JSON.stringify(col));
 
 		if (!useCrdt || direction === 1) {
+			// Move right
 			// Remove
 			columns_work.splice(index, 1);
 			// Add
