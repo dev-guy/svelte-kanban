@@ -1,5 +1,4 @@
-// import { useCrdt } from '$lib/stores/index.ts';
+import { useCrdt } from '$lib/stores/stores.ts';
 
 // WebRTC doesn't work with SSR
-// export const ssr = !useCrdt;
-export const ssr = false;
+export const ssr = !useCrdt;

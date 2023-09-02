@@ -11,5 +11,5 @@ For an empty board, use:
 
  <Kanban colsList={[]}/>
 -->
- <Kanban colsList={[]}/>
+<Kanban/>
 

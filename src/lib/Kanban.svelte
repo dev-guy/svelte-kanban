@@ -2,8 +2,8 @@
 	import { onMount, createEventDispatcher } from "svelte";
 	import Column from '$lib/components/Column/Column.svelte';
 	import AddColumnBtn from '$lib/components/AddColumnBtn.svelte';
-	import {getBoard, getLang, useCrdt} from '$lib/stores/index.ts';
-	import type {LangCode} from '$lib/lang/index.ts';
+	import {getBoard, getLang, useCrdt} from '$lib/stores/stores.ts';
+	import type {LangCode} from '$lib/lang/lang.js';
 
 	// Properties of the Kanban
 	export let lang: LangCode	= 'en';
@@ -102,8 +102,7 @@
 		card_top_coord.y = rect_card.top;
 
 		// by default the first empty card should take the place of the card dragged
-		// const columns_work = $board.columns;
-		// columns_work[dragged_card_infos.col].slots.splice(dragged_card_infos.index, 0, {empty:true});
+		// $board.columns[dragged_card_infos.col].slots.splice(dragged_card_infos.index, 0, {empty:true});
 		// tracking_last_empty_card.col = dragged_card_infos.col;
 		// tracking_last_empty_card.index = dragged_card_infos.index;
 		$board = $board;
@@ -163,18 +162,16 @@
 				if(i == dragged_card_infos.col) return;
 
 				// Copying columns
-				const columns_work = $board.columns;
-
 				// if the last empty is not empty and not the same as the one we are going to add, we need to delete it
-				if(tracking_last_empty_card.col != -1) columns_work[tracking_last_empty_card.col].slots.splice(tracking_last_empty_card.index, 1)
+				if(tracking_last_empty_card.col != -1) $board.columns[tracking_last_empty_card.col].slots.splice(tracking_last_empty_card.index, 1)
 
 				// Adding empty slot to the right column at the right position
 				let bool_add_empty = true;
-				for(let j=0; j<columns_work[i].slots.length; j++){
-					if(columns_work[i].slots[j].empty == true) bool_add_empty = false;
+				for(let j=0; j<$board.columns[i].slots.length; j++){
+					if($board.columns[i].slots[j].empty == true) bool_add_empty = false;
 				}
 
-				if(bool_add_empty) columns_work[i].slots.splice(position_order, 0, {empty:true});
+				if(bool_add_empty) $board.columns[i].slots.splice(position_order, 0, {empty:true});
 				tracking_last_empty_card = {col:i, index:position_order};// updating the last empty
 
 				$board = $board; 
@@ -228,31 +225,30 @@
 				}
 
 				// Copying columns
-				const columns_work = $board.columns;
-
 				if (useCrdt) card = JSON.parse(JSON.stringify(card));
 
-				columns_work[dragged_card_infos.col].slots.splice(dragged_card_infos.index, 1);
+				$board.columns[dragged_card_infos.col].slots.splice(dragged_card_infos.index, 1);
 				// console.log('LAST EMPTY CARD', tracking_last_empty_card);
 
 				if(tracking_last_empty_card.col != -1){ // deleting all the empty cards of the column
-					if (tracking_last_empty_card.index == columns_work[tracking_last_empty_card.col].slots.length) {
+					if (tracking_last_empty_card.index == $board.columns[tracking_last_empty_card.col].slots.length) {
 						tracking_last_empty_card.index--;
 					}
-					columns_work[tracking_last_empty_card.col].slots.splice(tracking_last_empty_card.index, 1); // if empty card exist, delete it
+					$board.columns[tracking_last_empty_card.col].slots.splice(tracking_last_empty_card.index, 1); // if empty card exist, delete it
 				} 
 				tracking_last_empty_card = {col:-1, index:-1}; // no more empty card to track => reinitialize
 				
-				// console.log('POSITION ORDER', position_order, 'columns work', columns_work[i].slots.length);
+				// console.log('POSITION ORDER', position_order, 'columns work', $board.columns[i].slots.length);
 
-				// if(position_order == 1 && columns_work[i].slots.length == 0) position_order = 0;
+				// if(position_order == 1 && $board.columns[i].slots.length == 0) position_order = 0;
 
 				// Adding card to column dragged on at the right position
 				
 				// Removing card from column dragged from
-				columns_work[i].slots.splice(position_order, 0, card);
+				$board.columns[i].slots.splice(position_order, 0, card);
 
 				$board = $board;
+
 				newCol = i;
 				newPos = position_order;
 				bool_drag_success = true;
@@ -284,9 +280,8 @@
 	}
 
 	function removeColumn(event){
-		const columns_temp = $board.columns;
-		const name = columns_temp[event.detail.index_col];
-		columns_temp.splice(event.detail.index_col, 1);
+		const name = $board.columns[event.detail.index_col];
+		$board.columns.splice(event.detail.index_col, 1);
 		$board = $board;
         dispatch('columnRemove', {position:event.detail.index_col, name, columns:$board.columns});  
 	}
@@ -314,10 +309,9 @@
 		let card = $board.columns[event.detail.col].slots[event.detail.card];
 		if (!card) return;
 		
-		const columns_work = $board.columns;
 		if (useCrdt) card = JSON.parse(JSON.stringify(card));
-		columns_work[event.detail.col].slots.splice(event.detail.card, 1);
-		columns_work[event.detail.col].slots.splice((event.detail.card-1), 0, card);
+		$board.columns[event.detail.col].slots.splice(event.detail.card, 1);
+		$board.columns[event.detail.col].slots.splice((event.detail.card-1), 0, card);
 		$board = $board;
 		dispatch('moveCardUp', {col:event.detail.col, old_pos:event.detail.card, new_pos:event.detail.card-1, columns:$board.columns});
 	}
@@ -329,10 +323,9 @@
 		let card = $board.columns[event.detail.col].slots[event.detail.card];
 		if (!card) return;
 
-		const columns_work = $board.columns;
 		if (useCrdt) card = JSON.parse(JSON.stringify(card));
-		columns_work[event.detail.col].slots.splice(event.detail.card, 1);
-		columns_work[event.detail.col].slots.splice((event.detail.card+1), 0, card);
+		$board.columns[event.detail.col].slots.splice(event.detail.card, 1);
+		$board.columns[event.detail.col].slots.splice((event.detail.card+1), 0, card);
 		$board = $board;
 		dispatch('moveCardDown', {col:event.detail.col, old_pos:event.detail.card, new_pos:event.detail.card+1, columns:$board.columns});  	
 	}
@@ -344,9 +337,7 @@
 		const newIndex = index + direction;
 		if (newIndex < 0 || newIndex >= $board.columns.length) return;
 
-		let columns_work = $board.columns;
-
-		let col = columns_work[index];
+		let col = $board.columns[index];
 		if (!col) return;
 
 		if (useCrdt) col = JSON.parse(JSON.stringify(col));
@@ -354,16 +345,16 @@
 		if (!useCrdt || direction === 1) {
 			// Move right
 			// Remove
-			columns_work.splice(index, 1);
+			$board.columns.splice(index, 1);
 			// Add
-			columns_work.splice(newIndex, 0, col)
+			$board.columns.splice(newIndex, 0, col)
 		} else {
 			// Move left
 			// No idea why syncedStore wants things done in this order
 			// Add
-			columns_work.splice(newIndex, 0, col);
+			$board.columns.splice(newIndex, 0, col);
 			// Remove
-			columns_work.splice(index+1, 1);
+			$board.columns.splice(index+1, 1);
 		}
 
 		$board = $board;
