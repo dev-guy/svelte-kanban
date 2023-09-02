@@ -2,7 +2,7 @@
 	import { onMount, createEventDispatcher } from "svelte";
 	import Column from '$lib/components/Column/Column.svelte';
 	import AddColumnBtn from '$lib/components/AddColumnBtn.svelte';
-	import {getBoard, getLang, useCrdt} from '$lib/stores/stores.ts';
+	import {getBoard, getLang, useCrdt} from '$lib/stores/stores.js';
 	import type {LangCode} from '$lib/lang/lang.js';
 
 	// Properties of the Kanban

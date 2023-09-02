@@ -1,6 +1,6 @@
 <script lang="ts">
     import {createEventDispatcher, onMount} from 'svelte';
-	import {getBoard, getLang} from '$lib/stores/stores.ts';
+	import {getBoard, getLang} from '$lib/stores/stores.js';
 
 	const board = getBoard();
 	const globalLang = getLang();

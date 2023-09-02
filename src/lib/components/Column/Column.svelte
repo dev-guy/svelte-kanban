@@ -1,6 +1,6 @@
 <script lang="ts">
     import {onMount, createEventDispatcher} from 'svelte';
-	import {getBoard, getLang} from '$lib/stores/stores.ts';
+	import {getBoard, getLang} from '$lib/stores/stores.js';
     import {fly, scale}     from 'svelte/transition';
     import Card             from '$lib/components/Card.svelte';
     import OptionsColumn    from '$lib/components/Column/OptionsColumn.svelte';
