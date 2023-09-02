@@ -402,7 +402,6 @@
 				{fontSecondary}
 				on:addColumn={addColumn}
 			/>
-
 		</div>
 		<div class="footer" style:background="{primary}"></div>
 	</div>
@@ -412,7 +411,7 @@
 
 <style lang="scss">
 	:root{
-		--light-bg:rgb(243, 244, 246);
+		--light-bg:rgb(255, 255, 255);
 		--dark-bg:#052C39;
 		--light-column-bg:rgb(243, 244, 246);
 		--dark-column-bg:#031D26;
@@ -453,7 +452,7 @@
 	}
 
 	.kanban.light, .light .kanban-container, .light .footer, .light .header{
-		background:#fff;
+		background:var(--light-bg);
 	}
 	.kanban.dark, .dark .kanban-container, .dark .footer, .dark .header{
 		background:var(--dark-bg);
