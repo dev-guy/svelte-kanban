@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { onMount, createEventDispatcher } from "svelte";
+	import { onMount, createEventDispatcher } from 'svelte';
 	import Column from '$lib/components/Column/Column.svelte';
 	import AddColumnBtn from '$lib/components/AddColumnBtn.svelte';
-	import {getBoard, getLang, useCrdt} from '$lib/stores/stores.js';
-	import type {LangCode} from '$lib/lang/lang.js';
+	import {getBoard, getLang, useCrdt} from '$lib/stores';
+	import type {LangCode} from '$lib/lang';
 
 	// Properties of the Kanban
 	export let lang: LangCode	= 'en';

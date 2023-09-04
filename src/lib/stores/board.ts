@@ -1,3 +1,5 @@
+// https://dev.to/jdgamble555/the-correct-way-to-use-stores-in-sveltekit-3h6i
+
 // ====================
 // When not using CRDT:
 /*
@@ -21,15 +23,12 @@ import { getContext, setContext } from 'svelte';
 import { writable } from 'svelte/store';
 import type { Writable } from 'svelte/store';
 
-import { Lang } from '$lib/lang/lang.js';
-import type { LangCode } from '$lib/lang/lang.js';
-
-type Columns = {
+type Board = {
 	columns: object[];
 };
 
-export function getBoard(): Writable<Columns> {
-	let obj: Writable<Columns> = getContext('board');
+export function getBoard(): Writable<Board> {
+	let obj: Writable<Board> = getContext('board');
 	if (obj) return obj;
 
 	// ====================
@@ -45,7 +44,7 @@ export function getBoard(): Writable<Columns> {
 	// To enable the webrtc provider, run: PORT=4444 npx y-webrtc server.js
 	if (!useCrdt) throw new Error('useCrdt should be true');
 	const store = syncedStore({ columns: [] });
-	obj = svelteSyncedStore(store) as unknown as Writable<Columns>;
+	obj = svelteSyncedStore(store) as unknown as Writable<Board>;
 	const rtc = new WebrtcProvider('svelte-kanban', getYjsDoc(store), {
 		signaling: ['ws://localhost:4444']
 	});
@@ -54,17 +53,5 @@ export function getBoard(): Writable<Columns> {
 	// */
 
 	setContext('board', obj);
-	return obj;
-}
-
-/**
- * @param {LangCode} lang?
- * @returns
- */
-export function getLang(lang: LangCode = 'en'): Writable<Lang> {
-	let obj: Writable<Lang> = getContext('lang');
-	if (obj) return obj;
-	obj = writable(new Lang(lang));
-	setContext('lang', obj);
 	return obj;
 }
