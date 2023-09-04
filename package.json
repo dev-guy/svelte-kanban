@@ -14,7 +14,7 @@
 		"package": "svelte-kit sync && svelte-package && publint",
 		"prepublishOnly": "npm run package",
 		"preview": "vite preview",
-		"pub": "npm run build && npm publish --access=public",
+		"pub": "npm run package && npm publish --access=public",
 		"test": "npm run test:integration && npm run test:unit",
 		"test:integration": "playwright test",
 		"test:unit": "vitest"
