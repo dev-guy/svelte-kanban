@@ -196,6 +196,12 @@
 
 	function cardDragEnd(e){
 		try {
+			// Removing event listeners
+			document.removeEventListener('mousemove', cardDragMove);
+			document.removeEventListener('mouseup', cardDragEnd);
+
+			if (tracking_last_empty_card.col === -1) return;
+
 			const elem_dragged = document.getElementById(`card-${dragged_card_infos.index}-col-${dragged_card_infos.col}`);
 			if (!elem_dragged) return;
 
@@ -206,9 +212,6 @@
 			let bool_drag_success = false;
 			e = e || window.event;
 			e.preventDefault();
-			// Removing event listeners
-			document.removeEventListener('mousemove', cardDragMove);
-			document.removeEventListener('mouseup', cardDragEnd);
 			const x_card_top 		= card_top_coord.x + (e.clientX - cOffX);
 			const y_card_top	 	= card_top_coord.y + (e.clientY - cOffY);
 			let newCol;
