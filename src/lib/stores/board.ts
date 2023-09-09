@@ -4,6 +4,7 @@
 // When not using CRDT:
 /*
 export const useCrdt = false;
+import { writable } from 'svelte/store';
 */
 
 // ====================================
@@ -20,7 +21,6 @@ import { WebrtcProvider } from 'y-webrtc';
 // */
 
 import { getContext, setContext } from 'svelte';
-import { writable } from 'svelte/store';
 import type { Writable } from 'svelte/store';
 
 type Board = {

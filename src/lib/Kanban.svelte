@@ -82,16 +82,17 @@
 	});
 
 	function cardDragStart(event){	
-        dispatch('cardDragStart', {card:event.detail.card, col:event.detail.col, event:event.detail.event});  
-		let e = event.detail.event;
-		e = e || window.event;
-		e.preventDefault();
-
 		// Storing infos of the card dragged (coordinates, rectangle)
 		dragged_card_infos.col = event.detail.col;
 		dragged_card_infos.index = event.detail.card;
-		dragged_card_infos.infos = $board.columns[dragged_card_infos.col]?.[dragged_card_infos.index];
-		if (!dragged_card_infos.infos) return;
+		const card = $board.columns[dragged_card_infos.col]?.slots?.[dragged_card_infos.index];
+		if (!card) return;
+
+        dispatch('cardDragStart', {card:event.detail.card, col:event.detail.col, event:event.detail.event});  
+
+		let e = event.detail.event;
+		e = e || window.event;
+		e.preventDefault();
 
 		elem_dragged = document.getElementById(`card-${dragged_card_infos.index}-col-${dragged_card_infos.col}`);
 		if (!elem_dragged) return;
@@ -277,6 +278,8 @@
 	}
 
 	function addCard(col_index:number){		
+		const column = $board.columns[col_index];
+		if (!column) return;
 		const card_temp = {
  			empty: false,
 			animate: false,
@@ -285,12 +288,9 @@
 			category: catsList[0],
 			date: new Date().toLocaleString().replace(/,.*/, ''),
  		};
-		const column = $board.columns[col_index]?.slots;
-		if (column) {
-			column.slots.unshift(card_temp);
-			if (!useCrdt) $board = $board;
-			dispatch('cardAdd', {col:col_index, columns:$board.columns});  
-		}
+		column.slots.unshift(card_temp);
+		if (!useCrdt) $board = $board;
+		dispatch('cardAdd', {col:col_index, columns:$board.columns});  
 	}
 
 	function removeColumn(event){
