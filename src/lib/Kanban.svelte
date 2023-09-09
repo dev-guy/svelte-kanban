@@ -190,6 +190,7 @@
 					if (!useCrdt) $board = $board; 
 				}
 				tracking_last_empty_card = {col:i, index:position_order};// updating the last empty
+				break;
 			}
 		}
 	};
@@ -249,14 +250,14 @@
 					// Copying columns
 					if (useCrdt) card = JSON.parse(JSON.stringify(card));
 
-					$board.columns[dragged_card_infos.col]?.slots?.splice(dragged_card_infos.index, 1);
+					$board.columns[dragged_card_infos.col].slots.splice(dragged_card_infos.index, 1);
 					// console.log('LAST EMPTY CARD', tracking_last_empty_card);
 
 					if(tracking_last_empty_card.col != -1){ // deleting all the empty cards of the column
-						if (tracking_last_empty_card.index == $board.columns[tracking_last_empty_card.col]?.slots?.length) {
-							if (tracking_last_empty_card.index > 0) tracking_last_empty_card.index--;
+						if (tracking_last_empty_card.index == $board.columns[tracking_last_empty_card.col]slotslength) {
+							tracking_last_empty_card.index--;
 						}
-						const slots = $board.columns[tracking_last_empty_card.col]?.slots;
+						const slots = $board.columns[tracking_last_empty_card.col].slots;
 						if (slots && tracking_last_empty_card.index < slots.length)
 							slots.splice(tracking_last_empty_card.index, 1); // if empty card exist, delete it
 					} 
