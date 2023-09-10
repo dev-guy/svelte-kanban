@@ -5,10 +5,6 @@ import type { Writable } from 'svelte/store';
 import { Lang } from '$lib/lang';
 import type { LangCode } from '$lib/lang';
 
-/**
- * @param {LangCode} lang?
- * @returns
- */
 export function getLang(lang: LangCode = 'en'): Writable<Lang> {
 	let obj: Writable<Lang> = getContext('lang');
 	if (obj) return obj;

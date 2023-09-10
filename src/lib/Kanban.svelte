@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { onMount, createEventDispatcher } from 'svelte';
-	import Column from '$lib/components/Column/Column.svelte';
-	import AddColumnBtn from '$lib/components/AddColumnBtn.svelte';
-	import {getBoard, getLang, useCrdt} from '$lib/stores';
-	import type {LangCode} from '$lib/lang';
+	import Column from './components/Column/Column.svelte';
+	import AddColumnBtn from './components/AddColumnBtn.svelte';
+	import {getBoard, getLang, useCrdt, getDropCard} from './stores';
+	import type {LangCode} from './lang';
 
 	// Properties of the Kanban
 	export let lang: LangCode	= 'en';
@@ -17,6 +17,7 @@
 	export let maxColumns 		= 5;
 
 	const globalLang = getLang(lang);
+	const tracking_last_empty_card = getDropCard();
 
 	// Default categories
 	export let catsList = [{
@@ -68,7 +69,6 @@
 
 	// Infos of the card being dragged
 	let dragged_card_infos = {col:-1, index:-1};
-	let tracking_last_empty_card = {col:-1, index:-1};
 	const board = getBoard();
 
 	colsList.forEach(function(column){
@@ -83,10 +83,16 @@
 		// Storing infos of the card dragged (coordinates, rectangle)
 		dragged_card_infos.col = event.detail.col;
 		dragged_card_infos.index = event.detail.card;
-		const card = $board.columns[dragged_card_infos.col]?.slots?.[dragged_card_infos.index];
-		if (!card) return;
 
-        dispatch('cardDragStart', {card:event.detail.card, col:event.detail.col, event:event.detail.event});  
+		$tracking_last_empty_card = {col: -1, index: -1};
+
+		const card = $board.columns[dragged_card_infos.col]?.slots?.[dragged_card_infos.index];
+		if (!card) {
+			dragged_card_infos = {col: -1, index: -1};
+			return;
+		}
+
+		dispatch('cardDragStart', {card:event.detail.card, col:event.detail.col, event:event.detail.event});  
 
 		let e = event.detail.event;
 		e = e || window.event;
@@ -95,7 +101,6 @@
 		const elem_dragged = document.getElementById(`card-${dragged_card_infos.index}-col-${dragged_card_infos.col}`);
 		if (!elem_dragged) {
 			dragged_card_infos = {col: -1, index: -1};
-			tracking_last_empty_card = {col: -1, index: -1};
 			return;
 		}
 
@@ -106,12 +111,6 @@
 		// Stocker la position du milieu top de la card au départ
 		card_top_coord.x = (rect_card.right + rect_card.left)/2;
 		card_top_coord.y = rect_card.top;
-
-		// by default the first empty card should take the place of the card dragged
-		// $board.columns[dragged_card_infos.col].slots.splice(dragged_card_infos.index, 0, {empty:true});
-		// tracking_last_empty_card.col = dragged_card_infos.col;
-		// tracking_last_empty_card.index = dragged_card_infos.index;
-		if (!useCrdt) $board = $board;
 		
 		document.addEventListener('mousemove', cardDragMove);
 		document.addEventListener('mouseup', cardDragEnd);
@@ -122,11 +121,11 @@
 		const elem_dragged = document.getElementById(`card-${dragged_card_infos.index}-col-${dragged_card_infos.col}`);
 		if (!elem_dragged) {
 			dragged_card_infos = {col: -1, index: -1};
-			tracking_last_empty_card = {col: -1, index: -1};
+			$tracking_last_empty_card = {col: -1, index: -1};
 			return;
 		}
 
-        dispatch('cardDragMove', {card:dragged_card_infos.index, col:dragged_card_infos.col, event:e});  
+		dispatch('cardDragMove', {card:dragged_card_infos.index, col:dragged_card_infos.col, event:e});  
 		// 'cardDragStart', {card:event.detail.card, col:event.detail.col, event:event.detail.event});
 
 		e = e || window.event;
@@ -170,26 +169,13 @@
 				}
 
 				// checking if the last empty slot is the same as the one found now (ie, we don't need to do anything) 
-				// if((tracking_last_empty_card.col == i && tracking_last_empty_card.index == position_order) || rect_card.) return;
-				if(tracking_last_empty_card.col == i && tracking_last_empty_card.index == position_order) return;
+				if($tracking_last_empty_card.col == i && $tracking_last_empty_card.index == position_order) return;
 
 				if(i == dragged_card_infos.col) return;
 
 				// Copying columns
-				// if the last empty is not empty and not the same as the one we are going to add, we need to delete it
-				if(tracking_last_empty_card.col != -1) $board.columns[tracking_last_empty_card.col]?.slots?.splice(tracking_last_empty_card.index, 1)
 
-				// Adding empty slot to the right column at the right position
-				let bool_add_empty = true;
-				for(let j=0; j<$board.columns[i].slots.length; j++){
-					if($board.columns[i].slots[j].empty == true) bool_add_empty = false;
-				}
-
-				if(bool_add_empty) {
-					$board.columns[i].slots.splice(position_order, 0, {empty:true});
-					if (!useCrdt) $board = $board; 
-				}
-				tracking_last_empty_card = {col:i, index:position_order};// updating the last empty
+				$tracking_last_empty_card = {col:i, index:position_order};// updating the last empty
 				break;
 			}
 		}
@@ -201,8 +187,6 @@
 			document.removeEventListener('mousemove', cardDragMove);
 			document.removeEventListener('mouseup', cardDragEnd);
 
-			if (tracking_last_empty_card.col === -1) return;
-
 			const elem_dragged = document.getElementById(`card-${dragged_card_infos.index}-col-${dragged_card_infos.col}`);
 			if (!elem_dragged) return;
 
@@ -210,9 +194,11 @@
 			if (!card) return;
 
 			dispatch('cardDragEnd', {card:dragged_card_infos.index, col:dragged_card_infos.col, event:e});  
+
 			let bool_drag_success = false;
 			e = e || window.event;
 			e.preventDefault();
+
 			const x_card_top 		= card_top_coord.x + (e.clientX - cOffX);
 			const y_card_top	 	= card_top_coord.y + (e.clientY - cOffY);
 			let newCol;
@@ -253,15 +239,6 @@
 					$board.columns[dragged_card_infos.col].slots.splice(dragged_card_infos.index, 1);
 					// console.log('LAST EMPTY CARD', tracking_last_empty_card);
 
-					if(tracking_last_empty_card.col != -1){ // deleting all the empty cards of the column
-						if (tracking_last_empty_card.index == $board.columns[tracking_last_empty_card.col]slotslength) {
-							tracking_last_empty_card.index--;
-						}
-						const slots = $board.columns[tracking_last_empty_card.col].slots;
-						if (slots && tracking_last_empty_card.index < slots.length)
-							slots.splice(tracking_last_empty_card.index, 1); // if empty card exist, delete it
-					} 
-					
 					// console.log('POSITION ORDER', position_order, 'columns work', $board.columns[i].slots.length);
 
 					// if(position_order == 1 && $board.columns[i].slots.length == 0) position_order = 0;
@@ -289,7 +266,7 @@
 		}
 		finally {
 			dragged_card_infos = {col: -1, index: -1};
-			tracking_last_empty_card = {col: -1, index: -1};
+			$tracking_last_empty_card = {col: -1, index: -1};
 		}
 	}
 
@@ -342,17 +319,19 @@
 		if (!card) return;
 		
 		if (useCrdt) card = JSON.parse(JSON.stringify(card));
+
 		$board.columns[event.detail.col].slots.splice(event.detail.card, 1);
 		$board.columns[event.detail.col].slots.splice((event.detail.card-1), 0, card);
+
 		if (!useCrdt) $board = $board;
 		dispatch('moveCardUp', {col:event.detail.col, old_pos:event.detail.card, new_pos:event.detail.card-1, columns:$board.columns});
 	}
 
 	function moveCardDown(event){
-		const numEvents = $board.columns[event.detail.col]?.slots?.length -1;
-		if(isNaN(numEvents) || event.detail.card == numEvents) return;
+		const lastCard = $board.columns[event.detail.col]?.slots?.length -1;
+		if(isNaN(lastCard) || event.detail.card >= lastCard) return;
 	
-		let card = $board.columns[event.detail.col]?.slots?.[event.detail.card];
+		let card = $board.columns[event.detail.col].slots[event.detail.card];
 		if (!card) return;
 
 		if (useCrdt) card = JSON.parse(JSON.stringify(card));

@@ -1,9 +1,9 @@
 <script lang="ts">
     import {onMount, createEventDispatcher} from 'svelte';
-	import {getBoard, getLang} from '$lib/stores';
+	import {getBoard, getLang, getDropCard} from '$lib/stores';
     import {fly, scale}     from 'svelte/transition';
-    import Card             from '$lib/components/Card.svelte';
-    import OptionsColumn    from '$lib/components/Column/OptionsColumn.svelte';
+    import Card             from '../Card.svelte';
+    import OptionsColumn    from './OptionsColumn.svelte';
 
     let bool_show_options = true;
 
@@ -20,6 +20,7 @@
 
 	const board = getBoard();
 	const globalLang = getLang();
+	const dropCard = getDropCard();
 
     const dispatch = createEventDispatcher();
 
@@ -83,7 +84,7 @@
     <div class="content"> 
             {#each slots as slot, index}
                 <div class="animate not-empty">
-                    {#if slot.empty == false}
+					{#if $dropCard.col !== index_col || index !== $dropCard.index}
                         <Card
                             id={index}
                             id_col={index_col}
