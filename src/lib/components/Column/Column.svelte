@@ -19,6 +19,9 @@
 	const globalLang = getLang();
 	const dropCard = getDropCard();
 
+	let numCards;
+	$: numCards = cards.length + ($dropCard.sameCol ? 0:($dropCard.col === index_col ? 1:0));
+
     const dispatch = createEventDispatcher();
 
     function handleMouseDown(e, index_card:number){
@@ -75,7 +78,7 @@
     </div>
 
     <div class="cards-count" style:color="{fontSecondary}">
-        {cards.length} {$globalLang.getStr(cards.length === 1 ? 'Card':'Cards')}
+        {numCards} {$globalLang.getStr(numCards === 1 ? 'Card':'Cards')}
     </div>
 
     <div class="content"> 

@@ -54,20 +54,17 @@
 	const dispatch = createEventDispatcher();
 
 	// Props used for setting up card size / dragNdrop
+	const HEIGHT_CARD = 105; // 96
 	const HEIGHT_CARD_CONTAINER = 120;
 	const STARTING_POINT_TOP = 98;
-	const HEIGHT_CARD = 105; // 96
+	const HEIGHT_CARD_GAP = HEIGHT_CARD_CONTAINER - STARTING_POINT_TOP;  
 	const REAL_STARTING_POINT_TOP = STARTING_POINT_TOP + HEIGHT_CARD/2; // The first point of reference is the middle of the first card (if there is one)
 
 	// Local property (ie used to track dragNdrop of the cards)
-	let cOffX_new = 0;
-	let cOffY_new = 0;
 	let cOffX     = 0;
 	let cOffY     = 0;
 	let rect_card;
-	let card_top_coord = {x:0, y:0};
-
-	// Infos of the card being dragged
+	let card_top_coord = {x:0, y:0}; // Infos of the card being dragged
 	let dragged_card_infos = {col:-1, index:-1};
 	const board = getBoard();
 
@@ -80,6 +77,10 @@
 	});
 
 	function cardDragStart(event){	
+		let e = event.detail.event;
+		e = e || window.event;
+		e.preventDefault();
+
 		$dropCard = {col: -1, index: -1};
 
 		// Storing infos of the card dragged (coordinates, rectangle)
@@ -93,10 +94,6 @@
 		}
 
 		dispatch('cardDragStart', {card:event.detail.card, col:event.detail.col, event:event.detail.event});  
-
-		let e = event.detail.event;
-		e = e || window.event;
-		e.preventDefault();
 
 		const elem_dragged = document.getElementById(`card-${dragged_card_infos.index}-col-${dragged_card_infos.col}`);
 		if (!elem_dragged) {
@@ -117,30 +114,29 @@
 	}
 
 	function cardDragMove(e) {
+		e = e || window.event;
+		e.preventDefault();
+
+		$dropCard = {col: -1, index: -1};
+
 		const elem_dragged = document.getElementById(`card-${dragged_card_infos.index}-col-${dragged_card_infos.col}`);
 		if (!elem_dragged) {
 			dragged_card_infos = {col: -1, index: -1};
-			$dropCard = {col: -1, index: -1};
 			return;
 		}
 
 		dispatch('cardDragMove', {card:dragged_card_infos.index, col:dragged_card_infos.col, event:e});  
-		// 'cardDragStart', {card:event.detail.card, col:event.detail.col, event:event.detail.event});
-
-		e = e || window.event;
-		e.preventDefault();
 
 		// Position live par rapport au click de départ
-		const x_live = (e.clientX - cOffX); 
-		const y_live = (e.clientY - cOffY);
-		elem_dragged.style.top = y_live.toString() + 'px';
-		elem_dragged.style.left = x_live.toString() + 'px';
+		const x_live = e.clientX - cOffX; 
+		let y_live = e.clientY - cOffY;
 
 		const x_card_top = card_top_coord.x + x_live; // card_top_coord.y (98) + e.clientY (100) - c0ffY (100)
 		const y_card_top = card_top_coord.y + y_live;
 
 		for (let i=0; i<$board.columns.length;i++){
 			const rect = document.getElementsByClassName('column')[i].getBoundingClientRect();
+
 			if((x_card_top >= rect.left)
 			  && (x_card_top <= rect.right)
 		      && (y_card_top >= rect.top)
@@ -150,7 +146,7 @@
 				let j = 1; // variable to increment to navigate between the cards of the column
 
 				// If at least one card is present in the column
-				if($board.columns[i].cards.length){
+				if ($board.columns[i].cards.length){
 					// 1- checking if the point is between the first card
 					if(y_card_top < REAL_STARTING_POINT_TOP) bool_position_order_found = true; // Position will stay at 0
 					// 2- Searching the position order of the card between the cards of the column
@@ -167,103 +163,83 @@
 					if(!bool_position_order_found) position_order = $board.columns[i].cards.length;
 				}
 
-				// checking if the last empty slot is the same as the one found now (ie, we don't need to do anything) 
-				if($dropCard.col == i && $dropCard.index == position_order) return;
+				// Dragging in the same column?
+				if (i === dragged_card_infos.col) {
+					const diff = position_order - dragged_card_infos.index;
+					if (diff > 0) {
+						if (diff == 1) {
+							if (position_order < $board.columns[i].cards.length) 
+							$dropCard = {col:i, index:position_order+1, sameCol: true};
+						} else {
+							$dropCard = {col:i, index:position_order, sameCol: true};
+						}
+						// Down
+					} else if (diff < 0) {
+						// Up
+						y_live -= HEIGHT_CARD_CONTAINER + HEIGHT_CARD_GAP;
+						$dropCard = {col:i, index:position_order, sameCol: true};
+					}
+				} else {
+					$dropCard = {col:i, index:position_order};
+				}
 
-				if(i == dragged_card_infos.col) return;
-
-				$dropCard = {col:i, index:position_order};
 				break;
 			}
 		}
+
+		elem_dragged.style.top = y_live.toString() + 'px';
+		elem_dragged.style.left = x_live.toString() + 'px';
 	};
 
 	function cardDragEnd(e){
+		e = e || window.event;
+		e.preventDefault();
+
+		let bool_drag_success = false;
+
 		try {
 			// Removing event listeners
 			document.removeEventListener('mousemove', cardDragMove);
 			document.removeEventListener('mouseup', cardDragEnd);
 
-			if ($dropCard.col === -1) return;
-
 			const elem_dragged = document.getElementById(`card-${dragged_card_infos.index}-col-${dragged_card_infos.col}`);
 			if (!elem_dragged) return;
 
-			let card = $board.columns[dragged_card_infos.col]?.cards?.[dragged_card_infos.index];
-			if (!card) return;
-
 			dispatch('cardDragEnd', {card:dragged_card_infos.index, col:dragged_card_infos.col, event:e});  
-
-			let bool_drag_success = false;
-			e = e || window.event;
-			e.preventDefault();
-
-			const x_card_top 		= card_top_coord.x + (e.clientX - cOffX);
-			const y_card_top	 	= card_top_coord.y + (e.clientY - cOffY);
-			let newCol;
-			let newPos;
-
-			for(let i=0; i<$board.columns.length;i++){
-				const rect = document.getElementsByClassName('column')[i].getBoundingClientRect();
-
-				if((x_card_top >= rect.left)
-				&& (x_card_top <= rect.right)
-				&& (y_card_top >= rect.top)
-				&& (y_card_top <= rect.bottom)) {
-					let bool_position_order_found = false; // Boolean signaling we found the order position of the card in the column (ie)
-					let position_order = 0; // Position order of the card in the column
-					let j = 1; // variable to increment to navigate between the cards of the column
-
-					// If at least one card is present in the column
-					if($board.columns[i].cards.length){
-						// 1- checking if the point is between the first card
-						if(y_card_top < REAL_STARTING_POINT_TOP) bool_position_order_found = true; // Position will stay at 0
-						// 2- Searching the position order of the card between the cards of the column
-						while(bool_position_order_found == false && j <= $board.columns[i].cards.length){
-							if(y_card_top <= (REAL_STARTING_POINT_TOP + j*HEIGHT_CARD_CONTAINER)){
-								bool_position_order_found = true;
-								position_order = j;
-								break;
-							}
-							j++;
-						}
-
-						// 3- If the boolean still at false => the card will be in last position
-						if(!bool_position_order_found) position_order = $board.columns[i].cards.length;
-					}
-
-					// Copying columns
-					if (useCrdt) card = JSON.parse(JSON.stringify(card));
-
-					$board.columns[dragged_card_infos.col].cards.splice(dragged_card_infos.index, 1);
-					// console.log('LAST EMPTY CARD', tracking_last_empty_card);
-
-					// console.log('POSITION ORDER', position_order, 'columns work', $board.columns[i].cards.length);
-
-					// if(position_order == 1 && $board.columns[i].cards.length == 0) position_order = 0;
-
-					// Adding card to column dragged on at the right position
-					
-					// Removing card from column dragged from
-					$board.columns[i].cards.splice(position_order, 0, card);
-
-					if (!useCrdt) $board = $board;
-
-					newCol = i;
-					newPos = position_order;
-					bool_drag_success = true;
-				}
-			}
 
 			elem_dragged.style.removeProperty('top');
 			elem_dragged.style.removeProperty('left');
 
-			// console.log(`ACTION [${action_dispatch}] OLD COL [${dragged_card_infos.col}] IN POSITION OLD POS [${dragged_card_infos.index}] NEW COL [${newCol}] NEW POS [${newPos}]`);
-			const action_dispatch = (bool_drag_success ? 'cardDragSuccess' : 'cardDragFailed');
-			let propsDispatch = (bool_drag_success ? {old_col:dragged_card_infos.col, old_pos:dragged_card_infos.index, new_col:newCol, new_pos:newPos, columns:$board.columns} : {col:dragged_card_infos.col, pos:dragged_card_infos.index});
-			dispatch(action_dispatch, propsDispatch);  
+			if ($dropCard.col === -1) return;
+
+			let card = $board.columns[dragged_card_infos.col].cards[dragged_card_infos.index];
+			if (useCrdt) card = JSON.parse(JSON.stringify(card));
+
+			// Dragged in the same column?
+			if (dragged_card_infos.col === $dropCard.col) {
+				// Remove the card
+				$board.columns[dragged_card_infos.col].cards.splice(dragged_card_infos.index, 1);
+				// Add the card
+				$board.columns[$dropCard.col].cards.splice($dropCard.index-1, 0, card);
+			} else {
+				// Remove the card
+				$board.columns[dragged_card_infos.col].cards.splice(dragged_card_infos.index, 1);
+				// Add the card
+				$board.columns[$dropCard.col].cards.splice($dropCard.index, 0, card);
+			}
+
+			if (!useCrdt) $board = $board;
+			bool_drag_success = true;
 		}
 		finally {
+			// console.log(`ACTION [${action_dispatch}] OLD COL [${dragged_card_infos.col}] IN POSITION OLD POS [${dragged_card_infos.index}] NEW COL [${newCol}] NEW POS [${newPos}]`);
+			const action_dispatch = (bool_drag_success ? 'cardDragSuccess' : 'cardDragFailed');
+			let propsDispatch = (bool_drag_success ? {
+				old_col:dragged_card_infos.col,
+				old_pos:dragged_card_infos.index,
+				new_col:$dropCard.col, new_pos:$dropCard.index, columns:$board.columns
+			} : {col:dragged_card_infos.col, pos:dragged_card_infos.index});
+			dispatch(action_dispatch, propsDispatch);  
 			dragged_card_infos = {col: -1, index: -1};
 			$dropCard = {col: -1, index: -1};
 		}
