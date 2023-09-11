@@ -117,7 +117,6 @@
 	}
 
 	function cardDragMove(e) {
-		// TODO: Verify elem_dragged is still valid
 		const elem_dragged = document.getElementById(`card-${dragged_card_infos.index}-col-${dragged_card_infos.col}`);
 		if (!elem_dragged) {
 			dragged_card_infos = {col: -1, index: -1};
@@ -184,6 +183,8 @@
 			// Removing event listeners
 			document.removeEventListener('mousemove', cardDragMove);
 			document.removeEventListener('mouseup', cardDragEnd);
+
+			if ($dropCard.col === -1) return;
 
 			const elem_dragged = document.getElementById(`card-${dragged_card_infos.index}-col-${dragged_card_infos.col}`);
 			if (!elem_dragged) return;
