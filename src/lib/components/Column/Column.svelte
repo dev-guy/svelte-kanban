@@ -1,24 +1,21 @@
 <script lang="ts">
     import {onMount, createEventDispatcher} from 'svelte';
 	import {getBoard, getLang, getDropCard} from '$lib/stores';
-    import {fly, scale}     from 'svelte/transition';
+    import {fly}     from 'svelte/transition';
     import Card             from '../Card.svelte';
     import OptionsColumn    from './OptionsColumn.svelte';
 
     let bool_show_options = true;
 
-	export let slots;
-    export let title;
+	export let title;
+	export let cards;
     export let index_col;
-    export let show_fake_slot;
     export let catsList;
     export let theme;
     export let secondary;
     export let fontPrimary;
     export let fontSecondary;
 
-
-	const board = getBoard();
 	const globalLang = getLang();
 	const dropCard = getDropCard();
 
@@ -31,7 +28,7 @@
 
     function modifyColumnHandler(){
         bool_show_options = false;
-        const input_id = 'input-colum'+index_col;
+        const input_id = 'input-column'+index_col;
 
         setTimeout(function(){
             document.getElementById(input_id).focus();
@@ -45,9 +42,9 @@
     }
 
     function saveColumn(){
-        const input_id = 'input-colum'+index_col;
+        const input_id = 'input-columnn'+index_col;
         const new_title = document.getElementById(input_id).value;
-        $board.columns[index_col].title = new_title;
+        getBoard().columns[index_col].title = new_title;
         bool_show_options = true;
         dispatch('columnSaveTitle', {title:new_title})
     }
@@ -59,7 +56,7 @@
         {#if bool_show_options}
             <button style:color="{fontPrimary}" class="button-title" id="title-column{index_col}" on:click={modifyColumnHandler}>{title}</button>
         {:else}
-            <input style:color="{fontPrimary}" type="text" id="input-colum{index_col}" class="title-input" value={title} />
+            <input style:color="{fontPrimary}" type="text" id="input-column{index_col}" class="title-input" value={title} />
         {/if}
         <OptionsColumn
             on:removeColumn
@@ -78,36 +75,35 @@
     </div>
 
     <div class="cards-count" style:color="{fontSecondary}">
-        {slots.length} {$globalLang.getStr(slots.length === 1 ? 'Card':'Cards')}
+        {cards.length} {$globalLang.getStr(cards.length === 1 ? 'Card':'Cards')}
     </div>
 
     <div class="content"> 
-            {#each slots as slot, index}
-                <div class="animate not-empty">
-					{#if $dropCard.col !== index_col || index !== $dropCard.index}
-                        <Card
-                            id={index}
-                            id_col={index_col}
-                            {catsList}
-                            on:mousedown="{(e) => {handleMouseDown(e, index)}}"
-
-                            title={slot.title}
-                            description={slot.description}
-                            category={slot.category}
-                            date={slot.date}
-
-                            on:cardPropModify
-                            on:cardPropSaved
-                            on:cardRemove
-                            on:moveCardUp
-                            on:moveCardDown
-                        />
-                    {:else}
-                        <div class="animate empty-slot"></div>
-                    {/if}
-                </div>
-            {/each}
-
+		{#each cards as card, index}
+			{#if $dropCard.col === index_col && $dropCard.index === index}
+				<div class="animate empty-card"></div>
+   			{/if}
+        	<div class="animate not-empty">
+				<Card
+					id={index}
+ 					id_col={index_col}
+					{catsList}
+					on:mousedown="{(e) => {handleMouseDown(e, index)}}"
+					title={card.title}
+					description={card.description}
+					category={card.category}
+					date={card.date}
+					on:cardPropModify
+					on:cardPropSaved
+					on:cardRemove
+					on:moveCardUp
+					on:moveCardDown
+				/>
+            </div>
+		{/each}
+		{#if $dropCard.col === index_col && $dropCard.col >= cards.length}
+			<div class="animate empty-card"/>
+		{/if}
     </div>
     <button class="add-card" on:click={() => {dispatch('addCard', {index:index_col});  }} style:color="{fontSecondary}">
         <span>{$globalLang.getStr('AddACard')} </span>
@@ -186,7 +182,7 @@
         background-color: rgba(0,0,0,0.1)
     }
 
-    .empty-slot{
+    .empty-card{
         display:flex;
         background-color: rgba(0,0,0,0.1);
         z-index:1;
@@ -305,10 +301,10 @@
     }
 
     .animate{
-        animation: growingSlot .3s ease-out forwards;
+        animation: growingCard .3s ease-out forwards;
     }
 
-    @keyframes growingSlot{
+    @keyframes growingCard{
         from{
             height:0px;
         }

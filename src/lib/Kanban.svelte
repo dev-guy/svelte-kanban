@@ -17,7 +17,7 @@
 	export let maxColumns 		= 5;
 
 	const globalLang = getLang(lang);
-	const tracking_last_empty_card = getDropCard();
+	const dropCard = getDropCard();
 
 	// Default categories
 	export let catsList = [{
@@ -75,18 +75,18 @@
 		$board.columns.push({
 			title:column.name,
 			coordinates: {x_start:0, x_end:0, y_start:0, y_end:0},
-			slots:column.cards || [],
+			cards:column.cards || [],
 		});
 	});
 
 	function cardDragStart(event){	
+		$dropCard = {col: -1, index: -1};
+
 		// Storing infos of the card dragged (coordinates, rectangle)
 		dragged_card_infos.col = event.detail.col;
 		dragged_card_infos.index = event.detail.card;
 
-		$tracking_last_empty_card = {col: -1, index: -1};
-
-		const card = $board.columns[dragged_card_infos.col]?.slots?.[dragged_card_infos.index];
+		const card = $board.columns[dragged_card_infos.col]?.cards?.[dragged_card_infos.index];
 		if (!card) {
 			dragged_card_infos = {col: -1, index: -1};
 			return;
@@ -121,7 +121,7 @@
 		const elem_dragged = document.getElementById(`card-${dragged_card_infos.index}-col-${dragged_card_infos.col}`);
 		if (!elem_dragged) {
 			dragged_card_infos = {col: -1, index: -1};
-			$tracking_last_empty_card = {col: -1, index: -1};
+			$dropCard = {col: -1, index: -1};
 			return;
 		}
 
@@ -151,11 +151,11 @@
 				let j = 1; // variable to increment to navigate between the cards of the column
 
 				// If at least one card is present in the column
-				if($board.columns[i].slots.length > 0){
+				if($board.columns[i].cards.length){
 					// 1- checking if the point is between the first card
 					if(y_card_top < REAL_STARTING_POINT_TOP) bool_position_order_found = true; // Position will stay at 0
 					// 2- Searching the position order of the card between the cards of the column
-					while(bool_position_order_found == false && j <= $board.columns[i].slots.length){
+					while(bool_position_order_found == false && j <= $board.columns[i].cards.length){
 						if(y_card_top <= (REAL_STARTING_POINT_TOP + j*HEIGHT_CARD_CONTAINER)){
 							bool_position_order_found = true;
 							position_order = j;
@@ -165,17 +165,16 @@
 					}
 
 					// 3- If the boolean still at false => the card will be in last position
-					if(!bool_position_order_found) position_order = $board.columns[i].slots.length;
+					if(!bool_position_order_found) position_order = $board.columns[i].cards.length;
 				}
 
 				// checking if the last empty slot is the same as the one found now (ie, we don't need to do anything) 
-				if($tracking_last_empty_card.col == i && $tracking_last_empty_card.index == position_order) return;
+				if($dropCard.col == i && $dropCard.index == position_order) return;
 
 				if(i == dragged_card_infos.col) return;
 
-				// Copying columns
-
-				$tracking_last_empty_card = {col:i, index:position_order};// updating the last empty
+				$dropCard = {col:i, index:position_order};
+				console.log('DROP CARD', $dropCard);
 				break;
 			}
 		}
@@ -190,7 +189,7 @@
 			const elem_dragged = document.getElementById(`card-${dragged_card_infos.index}-col-${dragged_card_infos.col}`);
 			if (!elem_dragged) return;
 
-			let card = $board.columns[dragged_card_infos.col]?.slots?.[dragged_card_infos.index];
+			let card = $board.columns[dragged_card_infos.col]?.cards?.[dragged_card_infos.index];
 			if (!card) return;
 
 			dispatch('cardDragEnd', {card:dragged_card_infos.index, col:dragged_card_infos.col, event:e});  
@@ -216,11 +215,11 @@
 					let j = 1; // variable to increment to navigate between the cards of the column
 
 					// If at least one card is present in the column
-					if($board.columns[i].slots.length > 0){
+					if($board.columns[i].cards.length){
 						// 1- checking if the point is between the first card
 						if(y_card_top < REAL_STARTING_POINT_TOP) bool_position_order_found = true; // Position will stay at 0
 						// 2- Searching the position order of the card between the cards of the column
-						while(bool_position_order_found == false && j <= $board.columns[i].slots.length){
+						while(bool_position_order_found == false && j <= $board.columns[i].cards.length){
 							if(y_card_top <= (REAL_STARTING_POINT_TOP + j*HEIGHT_CARD_CONTAINER)){
 								bool_position_order_found = true;
 								position_order = j;
@@ -230,23 +229,23 @@
 						}
 
 						// 3- If the boolean still at false => the card will be in last position
-						if(!bool_position_order_found) position_order = $board.columns[i].slots.length;
+						if(!bool_position_order_found) position_order = $board.columns[i].cards.length;
 					}
 
 					// Copying columns
 					if (useCrdt) card = JSON.parse(JSON.stringify(card));
 
-					$board.columns[dragged_card_infos.col].slots.splice(dragged_card_infos.index, 1);
+					$board.columns[dragged_card_infos.col].cards.splice(dragged_card_infos.index, 1);
 					// console.log('LAST EMPTY CARD', tracking_last_empty_card);
 
-					// console.log('POSITION ORDER', position_order, 'columns work', $board.columns[i].slots.length);
+					// console.log('POSITION ORDER', position_order, 'columns work', $board.columns[i].cards.length);
 
-					// if(position_order == 1 && $board.columns[i].slots.length == 0) position_order = 0;
+					// if(position_order == 1 && $board.columns[i].cards.length == 0) position_order = 0;
 
 					// Adding card to column dragged on at the right position
 					
 					// Removing card from column dragged from
-					$board.columns[i].slots.splice(position_order, 0, card);
+					$board.columns[i].cards.splice(position_order, 0, card);
 
 					if (!useCrdt) $board = $board;
 
@@ -266,7 +265,7 @@
 		}
 		finally {
 			dragged_card_infos = {col: -1, index: -1};
-			$tracking_last_empty_card = {col: -1, index: -1};
+			$dropCard = {col: -1, index: -1};
 		}
 	}
 
@@ -281,7 +280,7 @@
 			category: catsList[0],
 			date: new Date().toLocaleString().replace(/,.*/, ''),
  		};
-		column.slots.unshift(card_temp);
+		column.cards.unshift(card_temp);
 		if (!useCrdt) $board = $board;
 		dispatch('cardAdd', {col:col_index, columns:$board.columns});  
 	}
@@ -301,8 +300,7 @@
 		const col_temp = {
 			title:$globalLang.getStr('NewColumn'),
 			coordinates: {x_start:0, x_end:0, y_start:0, y_end:0},
-			rect:{},
-			slots:[]
+			cards: [],
 		}
 
 		const posAdd = $board.columns.length;
@@ -315,28 +313,28 @@
 	function moveCardUp(event){
 		if(!event.detail.card)return;
 
-		let card = $board.columns[event.detail.col]?.slots?.[event.detail.card];
+		let card = $board.columns[event.detail.col]?.cards?.[event.detail.card];
 		if (!card) return;
 		
 		if (useCrdt) card = JSON.parse(JSON.stringify(card));
 
-		$board.columns[event.detail.col].slots.splice(event.detail.card, 1);
-		$board.columns[event.detail.col].slots.splice((event.detail.card-1), 0, card);
+		$board.columns[event.detail.col].cards.splice(event.detail.card, 1);
+		$board.columns[event.detail.col].cards.splice((event.detail.card-1), 0, card);
 
 		if (!useCrdt) $board = $board;
 		dispatch('moveCardUp', {col:event.detail.col, old_pos:event.detail.card, new_pos:event.detail.card-1, columns:$board.columns});
 	}
 
 	function moveCardDown(event){
-		const lastCard = $board.columns[event.detail.col]?.slots?.length -1;
+		const lastCard = $board.columns[event.detail.col]?.cards?.length -1;
 		if(isNaN(lastCard) || event.detail.card >= lastCard) return;
 	
-		let card = $board.columns[event.detail.col].slots[event.detail.card];
+		let card = $board.columns[event.detail.col].cards[event.detail.card];
 		if (!card) return;
 
 		if (useCrdt) card = JSON.parse(JSON.stringify(card));
-		$board.columns[event.detail.col].slots.splice(event.detail.card, 1);
-		$board.columns[event.detail.col].slots.splice((event.detail.card+1), 0, card);
+		$board.columns[event.detail.col].cards.splice(event.detail.card, 1);
+		$board.columns[event.detail.col].cards.splice((event.detail.card+1), 0, card);
 		if (!useCrdt) $board = $board;
 		dispatch('moveCardDown', {col:event.detail.col, old_pos:event.detail.card, new_pos:event.detail.card+1, columns:$board.columns});  	
 	}
@@ -384,10 +382,10 @@
 		<div class="kanban-container">
 			{#each $board.columns as column, index_col (index_col)}
 				<Column
+					title={column.title}
+					cards={column.cards}
 					{theme}
 					{catsList}
-					slots={column.slots}
-					title={column.title}
 					{index_col}
 					{secondary}
 					{third}

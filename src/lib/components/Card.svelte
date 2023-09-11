@@ -10,7 +10,7 @@
 
     function removeCard(e){
 		const column_temp = $board.columns[id_col];
-		column_temp.slots.splice(id, 1);
+		column_temp.cards.splice(id, 1);
 		$board = $board;
         dispatch('cardRemove', {});  
     }
@@ -33,13 +33,13 @@
         document.getElementById(modify).style.display = '';
         document.getElementById(input).style.display = 'none';
         document.getElementById(save).style.display = 'none';
-        $board.columns[id_col].slots[id][prop] = (<HTMLInputElement>document.getElementById(input)).value;
+        $board.columns[id_col].cards[id][prop] = (<HTMLInputElement>document.getElementById(input)).value;
         dispatch('cardPropSaved', {prop, col:id_col, card:id, value:(<HTMLInputElement>document.getElementById(input)).value});  
     }
  
     function changeCategory(cat_index:number){
-        const oldValue = $board.columns[id_col].slots[id].category;
-        $board.columns[id_col].slots[id].category = catsList[cat_index];
+        const oldValue = $board.columns[id_col].cards[id].category;
+        $board.columns[id_col].cards[id].category = catsList[cat_index];
         bool_show_cats_list = false;
         dispatch('cardPropSaved', {prop:'category', col:id_col, card:id, oldValue, newValue:catsList[cat_index]}); 
     }
@@ -47,9 +47,9 @@
     export let id:number;
     export let id_col:number;
     export let title = $globalLang.getStr('NewCard');
-    export let description = 'empty';
+    export let description;
     export let category = {label:'default', bgColor:'gray', color:'white'};
-    export let date = '01/01/2021';
+    export let date;
     export let catsList;
 
     function handleKeyUp(event, source:string){
