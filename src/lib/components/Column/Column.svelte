@@ -101,7 +101,7 @@
 				/>
             </div>
 		{/each}
-		{#if $dropCard.col === index_col && $dropCard.col >= cards.length}
+		{#if $dropCard.col === index_col && $dropCard.index >= cards.length}
 			<div class="animate empty-card"/>
 		{/if}
     </div>

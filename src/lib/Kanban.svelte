@@ -174,7 +174,6 @@
 				if(i == dragged_card_infos.col) return;
 
 				$dropCard = {col:i, index:position_order};
-				console.log('DROP CARD', $dropCard);
 				break;
 			}
 		}
