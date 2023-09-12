@@ -82,32 +82,38 @@
 		e.preventDefault();
 
 		$dropCard = {col: -1, index: -1};
+		dragged_card_infos = {col: -1, index: -1};
 
-		// Storing infos of the card dragged (coordinates, rectangle)
-		dragged_card_infos.col = event.detail.col;
-		dragged_card_infos.index = event.detail.card;
+		const {col, card: index} = event.detail;
 
-		const card = $board.columns[dragged_card_infos.col]?.cards?.[dragged_card_infos.index];
+		const card = $board.columns[col]?.cards?.[index];
 		if (!card) {
 			dragged_card_infos = {col: -1, index: -1};
 			return;
 		}
 
-		dispatch('cardDragStart', {card:event.detail.card, col:event.detail.col, event:event.detail.event});  
+		dispatch('cardDragStart', {card, col, event:event.detail.event});  
 
-		const elem_dragged = document.getElementById(`card-${dragged_card_infos.index}-col-${dragged_card_infos.col}`);
-		if (!elem_dragged) {
-			dragged_card_infos = {col: -1, index: -1};
-			return;
-		}
+		const elem_dragged = document.getElementById(`card-${index}-col-${col}`);
+		if (!elem_dragged) return;
+
+		// Storing infos of the card dragged (coordinates, rectangle)
+		dragged_card_infos.col = col;
+		dragged_card_infos.index = index;
 
 		cOffX = e.clientX - elem_dragged.offsetLeft;
 		cOffY = e.clientY - elem_dragged.offsetTop;
+
+		console.log({cOffX, cOffY});
 		rect_card = elem_dragged.getBoundingClientRect();
+		console.log(rect_card);
 
 		// Stocker la position du milieu top de la card au départ
 		card_top_coord.x = (rect_card.right + rect_card.left)/2;
 		card_top_coord.y = rect_card.top;
+
+		console.log({card_top_coord});
+		console.log('start');
 		
 		document.addEventListener('mousemove', cardDragMove);
 		document.addEventListener('mouseup', cardDragEnd);
@@ -119,23 +125,30 @@
 
 		$dropCard = {col: -1, index: -1};
 
+		dispatch('cardDragMove', {card:dragged_card_infos.index, col:dragged_card_infos.col, event:e});  
+
 		const elem_dragged = document.getElementById(`card-${dragged_card_infos.index}-col-${dragged_card_infos.col}`);
 		if (!elem_dragged) {
 			dragged_card_infos = {col: -1, index: -1};
 			return;
 		}
 
-		dispatch('cardDragMove', {card:dragged_card_infos.index, col:dragged_card_infos.col, event:e});  
-
 		// Position live par rapport au click de départ
 		const x_live = e.clientX - cOffX; 
 		let y_live = e.clientY - cOffY;
 
+		console.log({cOffX, cOffY });
+		console.log(card_top_coord);
+		console.log({x_live, y_live})
+
 		const x_card_top = card_top_coord.x + x_live; // card_top_coord.y (98) + e.clientY (100) - c0ffY (100)
 		const y_card_top = card_top_coord.y + y_live;
 
+		console.log({x_card_top, y_card_top});
+
 		for (let i=0; i<$board.columns.length;i++){
 			const rect = document.getElementsByClassName('column')[i].getBoundingClientRect();
+			console.log(rect);
 
 			if((x_card_top >= rect.left)
 			  && (x_card_top <= rect.right)
@@ -202,10 +215,10 @@
 			document.removeEventListener('mousemove', cardDragMove);
 			document.removeEventListener('mouseup', cardDragEnd);
 
+			dispatch('cardDragEnd', {card:dragged_card_infos.index, col:dragged_card_infos.col, event:e});  
+
 			const elem_dragged = document.getElementById(`card-${dragged_card_infos.index}-col-${dragged_card_infos.col}`);
 			if (!elem_dragged) return;
-
-			dispatch('cardDragEnd', {card:dragged_card_infos.index, col:dragged_card_infos.col, event:e});  
 
 			elem_dragged.style.removeProperty('top');
 			elem_dragged.style.removeProperty('left');
