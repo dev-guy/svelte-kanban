@@ -1,6 +1,6 @@
 <script lang="ts">
-    import {onMount, createEventDispatcher} from 'svelte';
-	import {getBoard, getLang, getDropCard} from '$lib/stores';
+    import {createEventDispatcher} from 'svelte';
+	import {getBoard, getLang, getDragDrop} from '$lib/stores';
     import {fly}     from 'svelte/transition';
     import Card             from '../Card.svelte';
     import OptionsColumn    from './OptionsColumn.svelte';
@@ -9,7 +9,7 @@
 
 	export let title;
 	export let cards;
-    export let index_col;
+    export let index_col: number;
     export let catsList;
     export let theme;
     export let secondary;
@@ -17,10 +17,13 @@
     export let fontSecondary;
 
 	const globalLang = getLang();
-	const dropCard = getDropCard();
+	const dragDrop = getDragDrop();
 
-	let numCards;
-	$: numCards = cards.length + ($dropCard.sameCol ? 0:($dropCard.col === index_col ? 1:0));
+	let draggingInThisColumn = false;
+	$: draggingInThisColumn = !!($dragDrop.from && $dragDrop.from.col === $dragDrop.to?.col);
+
+	let numCards = 0;
+	$: numCards = cards.length + (draggingInThisColumn ? 0 : Number($dragDrop.to?.col === index_col));
 
     const dispatch = createEventDispatcher();
 
@@ -31,11 +34,12 @@
 
     function modifyColumnHandler(){
         bool_show_options = false;
-        const input_id = 'input-column'+index_col;
+        const input_id = 
 
         setTimeout(function(){
-            document.getElementById(input_id).focus();
-            document.getElementById(input_id).addEventListener('keyup', function(e){
+            const elem = document.getElementById(input_id);
+            elem.focus();
+            elem.addEventListener('keyup', function(e){
                 if(e.key == 'Enter'){
                     saveColumn();
                 }
@@ -83,28 +87,74 @@
 
     <div class="content"> 
 		{#each cards as card, index}
-			{#if $dropCard.col === index_col && $dropCard.index === index}
-				<div class="animate empty-card"></div>
-   			{/if}
-        	<div class="animate not-empty">
-				<Card
-					id={index}
- 					id_col={index_col}
-					{catsList}
-					on:mousedown="{(e) => {handleMouseDown(e, index)}}"
-					title={card.title}
-					description={card.description}
-					category={card.category}
-					date={card.date}
-					on:cardPropModify
-					on:cardPropSaved
-					on:cardRemove
-					on:moveCardUp
-					on:moveCardDown
-				/>
-            </div>
+			{#if $dragDrop.from}
+				{#if draggingInThisColumn}
+					{#if index && $dragDrop.from.index && index !== $dragDrop.to?.index}
+					<!-- svelte-ignore empty-block -->
+					{#if $dragDrop.from.index === index && $dragDrop.to.index === index}
+						<div class="animate empty-card"/>
+					{:else if index !== $dragDrop.from.index}
+						<div class="animate not-empty">
+							<Card
+								id={index}
+								id_col={index_col}
+								{catsList}
+								on:mousedown="{(e) => {handleMouseDown(e, index)}}"
+								title={card.title}
+								description={card.description}
+								category={card.category}
+								date={card.date}
+								on:cardPropModify
+								on:cardPropSaved
+								on:cardRemove
+								on:moveCardUp
+								on:moveCardDown
+							/>
+						</div>
+					{/if}
+					{/if}
+				{:else if $dragDrop.to?.col === index_col && $dragDrop.to?.index === index}
+					<div class="animate empty-card"/>
+				{:else}
+					<div class="animate not-empty">
+						<Card
+							id={index}
+							id_col={index_col}
+							{catsList}
+							on:mousedown="{(e) => {handleMouseDown(e, index)}}"
+							title={card.title}
+							description={card.description}
+							category={card.category}
+							date={card.date}
+							on:cardPropModify
+							on:cardPropSaved
+							on:cardRemove
+							on:moveCardUp
+							on:moveCardDown
+						/>
+					</div>
+				{/if}
+			{:else}
+				<div class="animate not-empty">
+					<Card
+						id={index}
+						id_col={index_col}
+						{catsList}
+						on:mousedown="{(e) => {handleMouseDown(e, index)}}"
+						title={card.title}
+						description={card.description}
+						category={card.category}
+						date={card.date}
+						on:cardPropModify
+						on:cardPropSaved
+						on:cardRemove
+						on:moveCardUp
+						on:moveCardDown
+					/>
+				</div>
+			{/if}
 		{/each}
-		{#if $dropCard.col === index_col && $dropCard.index >= cards.length}
+		{#if $dragDrop.to && $dragDrop.to.col === index_col && $dragDrop.to.index >= cards.length}
 			<div class="animate empty-card"/>
 		{/if}
     </div>
