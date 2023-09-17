@@ -20,10 +20,10 @@
 	const dragDrop = getDragDrop();
 
 	let draggingInThisColumn = false;
-	$: draggingInThisColumn = !!($dragDrop.from && $dragDrop.from.col === $dragDrop.to?.col);
+	$: draggingInThisColumn = !!($dragDrop.from.col !== undefined && $dragDrop.from.col === $dragDrop.to.col && $dragDrop.from.col === index_col);
 
 	let numCards = 0;
-	$: numCards = cards.length + (draggingInThisColumn ? 0 : Number($dragDrop.to?.col === index_col));
+	$: numCards = cards.length + (draggingInThisColumn ? 0 : Number($dragDrop.to.col === index_col));
 
     const dispatch = createEventDispatcher();
 
@@ -87,14 +87,15 @@
 
     <div class="content"> 
 		{#each cards as card, index}
-			{#if $dragDrop.from}
+			{#if $dragDrop.from.col !== undefined && $dragDrop.to.col !== undefined && 
+			(draggingInThisColumn || $dragDrop.to.col === index_col)}
 				{#if draggingInThisColumn}
-					{#if index && $dragDrop.from.index && index !== $dragDrop.to?.index}
+					{#if $dragDrop.from.index === index && $dragDrop.to.index > index}
 					<!-- svelte-ignore empty-block -->
-					{#if $dragDrop.from.index === index && $dragDrop.to.index === index}
+					{:else if $dragDrop.to.col === index_col && $dragDrop.to.index === index}
 						<div class="animate empty-card"/>
-					{:else if index !== $dragDrop.from.index}
-						<div class="animate not-empty">
+					{:else}
+						<div class="noanimate not-empty">
 							<Card
 								id={index}
 								id_col={index_col}
@@ -112,11 +113,10 @@
 							/>
 						</div>
 					{/if}
-					{/if}
-				{:else if $dragDrop.to?.col === index_col && $dragDrop.to?.index === index}
+				{:else if $dragDrop.to.col === index_col && $dragDrop.to.index === index}
 					<div class="animate empty-card"/>
 				{:else}
-					<div class="animate not-empty">
+					<div class="noanimate not-empty">
 						<Card
 							id={index}
 							id_col={index_col}
@@ -135,7 +135,7 @@
 					</div>
 				{/if}
 			{:else}
-				<div class="animate not-empty">
+				<div class="noanimate not-empty">
 					<Card
 						id={index}
 						id_col={index_col}
@@ -154,7 +154,22 @@
 				</div>
 			{/if}
 		{/each}
-		{#if $dragDrop.to && $dragDrop.to.col === index_col && $dragDrop.to.index >= cards.length}
+		{#if draggingInThisColumn}
+		you are dragging me
+		<div class="animate not-empty">
+			<Card
+				id={$dragDrop.from.index}
+				id_col={index_col}
+				{catsList}
+				on:mousedown="{(e) => {handleMouseDown(e, $dragDrop.from.index)}}"
+				on:cardPropModify
+				on:cardPropSaved
+				on:cardRemove
+				on:moveCardUp
+				on:moveCardDown
+			/>
+		</div>
+		{:else if $dragDrop.to.col === index_col && $dragDrop.to.index >= cards.length}
 			<div class="animate empty-card"/>
 		{/if}
     </div>
@@ -356,6 +371,10 @@
     .animate{
         animation: growingCard .3s ease-out forwards;
     }
+
+	.noanimate{
+		height:120px
+	}
 
     @keyframes growingCard{
         from{

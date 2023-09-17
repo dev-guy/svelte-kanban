@@ -80,20 +80,22 @@
 		e = e || window.event;
 		e.preventDefault();
 
-		$dragDrop = {};
-
 		const {col, card: index} = event.detail;
 
 		const card = $board.columns[col]?.cards?.[index];
-		if (!card) return;
+		if (!card) {
+			$dragDrop.from.col = undefined;
+			$dragDrop.to.col = undefined;
+			return;
+		}
 
 		dispatch('cardDragStart', {card, col, event:event.detail.event});  
 
 		const elem_dragged = document.getElementById(`card-${index}-col-${col}`);
 		if (!elem_dragged) return;
 
-		// Storing infos of the card dragged (coordinates, rectangle)
-		$dragDrop.from = { col, index };
+		$dragDrop.from.col = col;
+		$dragDrop.from.index = index;
 
 		cOffX = e.clientX - elem_dragged.offsetLeft;
 		cOffY = e.clientY - elem_dragged.offsetTop;
@@ -112,15 +114,15 @@
 		e = e || window.event;
 		e.preventDefault();
 
-		if (!$dragDrop.from) return;
+		if ($dragDrop.from.col === undefined) return;
 
-		delete $dragDrop.to;
+		delete $dragDrop.to.col;
 
 		dispatch('cardDragMove', {card:$dragDrop.from.index, col:$dragDrop.from.col, event:e});  
 
 		const elem_dragged = document.getElementById(`card-${$dragDrop.from.index}-col-${$dragDrop.from.col}`);
 		if (!elem_dragged) {
-			delete $dragDrop.from;
+			delete $dragDrop.from.col;
 			return;
 		}
 
@@ -171,15 +173,13 @@
 						}
 						// Down
 					} else if (diff < 0) {
-				console.log('up')
 						// Up
-						y_live -= HEIGHT_CARD_CONTAINER + HEIGHT_CARD_GAP;
+						// y_live -= HEIGHT_CARD_CONTAINER + HEIGHT_CARD_GAP;
 						$dragDrop.to = {col:i, index:position_order};
 					}
 				} else {
 					$dragDrop.to = {col:i, index:position_order};
 				}
-				console.log($dragDrop.to)
 
 				break;
 			}
@@ -197,7 +197,7 @@
 		document.removeEventListener('mousemove', cardDragMove);
 		document.removeEventListener('mouseup', cardDragEnd);
 
-		if (!$dragDrop.from) {
+		if ($dragDrop.from.col === undefined) {
 			dispatch('cardDragEnd', {event:e});  
 			return;
 		}
@@ -210,7 +210,7 @@
 		let bool_drag_success = false;
 
 		try {
-			if (!$dragDrop.to) return;
+			if ($dragDrop.to.col === undefined) return;
 
 			let card = $board.columns[$dragDrop.from.col].cards[$dragDrop.from.index];
 			if (useCrdt) card = JSON.parse(JSON.stringify(card));
@@ -251,7 +251,9 @@
 				propsDispatch.new_pos = $dragDrop.to.index;
 			}
 
-			$dragDrop = {};
+			$dragDrop.from.col = undefined;
+			$dragDrop.to.col = undefined;
+
 			dispatch(action_dispatch, propsDispatch);  
 		}
 	}
