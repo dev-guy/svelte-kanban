@@ -23,10 +23,10 @@
 	$: dragAndDropInThisColumn = !!($dragDrop.from && $dragDrop.from.col === $dragDrop.to?.col && $dragDrop.from.col === index_col);
 
 	let dropInThisColumn = false;
-	$: dropInThisColumn = !dragAndDropInThisColumn && $dragDrop.to?.col === index_col;
+	$: dropInThisColumn = $dragDrop.to?.col === index_col;
 
 	let numCards = 0;
-	$: numCards = cards.length + (dragAndDropInThisColumn ? 0 : Number($dragDrop.to?.col === index_col));
+	$: numCards = cards.length + (dragAndDropInThisColumn ? 0 : Number(dropInThisColumn));
 
     const dispatch = createEventDispatcher();
 
@@ -93,9 +93,7 @@
 			{#if dragAndDropInThisColumn && $dragDrop.from.index === index && $dragDrop.from.index < $dragDrop.to.index}
 				<!-- svelte-ignore empty-block -->
 			{:else}
-				{#if (dropInThisColumn && $dragDrop.to.index === index)
-			    ||  (dragAndDropInThisColumn && $dragDrop.to.index === index)
-			    }
+				{#if dropInThisColumn && $dragDrop.to.index === index}
 				  <div class="animate empty-card"/>
 				{/if}
 				<div class="animate not-empty">
@@ -117,11 +115,11 @@
 				</div>
 			{/if}
 		{/each}
-		{#if $dragDrop.to?.index >= cards.length}
+		{#if dropInThisColumn && $dragDrop.to.index >= cards.length}
 			<div class="animate empty-card"/>
 		{/if}
 		{#if dragAndDropInThisColumn && $dragDrop.from.index < $dragDrop.to.index}
-			<div class="animate not-empty">
+			<div class="animate not-empty" >
 				<Card
 					id={$dragDrop.from.index}
 					id_col={index_col}
@@ -136,6 +134,7 @@
 					on:cardRemove
 					on:moveCardUp
 					on:moveCardDown
+					topoffset={120*($dragDrop.to.index - $dragDrop.from.index)+60}
 				/>
 			</div>
 		{/if}
