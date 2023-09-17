@@ -162,21 +162,17 @@
 					if(!bool_position_order_found) position_order = $board.columns[i].cards.length;
 				}
 
+				$dragDrop.to.card = position_order;
+
 				if (i === $dragDrop.from.col) {
 					// Dragging in the same column
 					const diff = position_order - $dragDrop.from.card;
-					if (diff) {
-						if (diff === 1) {
-							break;
-						}
+					if (diff && diff !== 1) {
 						if (diff < 0) y_live -= (HEIGHT_CARD_CONTAINER + HEIGHT_CARD_GAP);
 						$dragDrop.to.col = i;
-						$dragDrop.to.card = position_order;
 					}
-					// if (position_order >= $board.columns[i].cards.length) $dragDrop.to = {col:i, index:position_order+1};
 				} else {
 					$dragDrop.to.col = i;
-					$dragDrop.to.card = position_order;
 				}
 
 				break;

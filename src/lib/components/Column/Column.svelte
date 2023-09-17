@@ -23,13 +23,7 @@
 	$: dropHere = $dragDrop.to.col === index_col;
 
 	let dragAndDropHere = false;
-	$: dragAndDropHere = dropHere && $dragDrop.from.col === index_col;
-
-	let dragDownHere = false;
-	$: dragDownHere = dragAndDropHere && $dragDrop.from.card < $dragDrop.to.card;
-
-	let dragUpHere = false;
-	$: dragUpHere = dragAndDropHere && !dragDownHere;
+	$: dragAndDropHere = $dragDrop.from.col === index_col && $dragDrop.to.col === index_col;
 
 	let numCards = 0;
 	$: numCards = cards.length + (dragAndDropHere ? 0 : Number(dropHere));
