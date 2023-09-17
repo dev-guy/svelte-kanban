@@ -19,11 +19,14 @@
 	const globalLang = getLang();
 	const dragDrop = getDragDrop();
 
-	let draggingInThisColumn = false;
-	$: draggingInThisColumn = !!($dragDrop.from.col !== undefined && $dragDrop.from.col === $dragDrop.to.col && $dragDrop.from.col === index_col);
+	let dragAndDropInThisColumn = false;
+	$: dragAndDropInThisColumn = !!($dragDrop.from && $dragDrop.from.col === $dragDrop.to?.col && $dragDrop.from.col === index_col);
+
+	let dropInThisColumn = false;
+	$: dropInThisColumn = !dragAndDropInThisColumn && $dragDrop.to?.col === index_col;
 
 	let numCards = 0;
-	$: numCards = cards.length + (draggingInThisColumn ? 0 : Number($dragDrop.to.col === index_col));
+	$: numCards = cards.length + (dragAndDropInThisColumn ? 0 : Number($dragDrop.to?.col === index_col));
 
     const dispatch = createEventDispatcher();
 
@@ -87,55 +90,15 @@
 
     <div class="content"> 
 		{#each cards as card, index}
-			{#if $dragDrop.from.col !== undefined && $dragDrop.to.col !== undefined && 
-			(draggingInThisColumn || $dragDrop.to.col === index_col)}
-				{#if draggingInThisColumn}
-					{#if $dragDrop.from.index === index && $dragDrop.to.index > index}
-					<!-- svelte-ignore empty-block -->
-					{:else if $dragDrop.to.col === index_col && $dragDrop.to.index === index}
-						<div class="animate empty-card"/>
-					{:else}
-						<div class="noanimate not-empty">
-							<Card
-								id={index}
-								id_col={index_col}
-								{catsList}
-								on:mousedown="{(e) => {handleMouseDown(e, index)}}"
-								title={card.title}
-								description={card.description}
-								category={card.category}
-								date={card.date}
-								on:cardPropModify
-								on:cardPropSaved
-								on:cardRemove
-								on:moveCardUp
-								on:moveCardDown
-							/>
-						</div>
-					{/if}
-				{:else if $dragDrop.to.col === index_col && $dragDrop.to.index === index}
-					<div class="animate empty-card"/>
-				{:else}
-					<div class="noanimate not-empty">
-						<Card
-							id={index}
-							id_col={index_col}
-							{catsList}
-							on:mousedown="{(e) => {handleMouseDown(e, index)}}"
-							title={card.title}
-							description={card.description}
-							category={card.category}
-							date={card.date}
-							on:cardPropModify
-							on:cardPropSaved
-							on:cardRemove
-							on:moveCardUp
-							on:moveCardDown
-						/>
-					</div>
-				{/if}
+			{#if dragAndDropInThisColumn && $dragDrop.from.index === index && $dragDrop.from.index < $dragDrop.to.index}
+				<!-- svelte-ignore empty-block -->
 			{:else}
-				<div class="noanimate not-empty">
+				{#if (dropInThisColumn && $dragDrop.to.index === index)
+			    ||  (dragAndDropInThisColumn && $dragDrop.to.index === index)
+			    }
+				  <div class="animate empty-card"/>
+				{/if}
+				<div class="animate not-empty">
 					<Card
 						id={index}
 						id_col={index_col}
@@ -154,23 +117,27 @@
 				</div>
 			{/if}
 		{/each}
-		{#if draggingInThisColumn}
-		you are dragging me
-		<div class="animate not-empty">
-			<Card
-				id={$dragDrop.from.index}
-				id_col={index_col}
-				{catsList}
-				on:mousedown="{(e) => {handleMouseDown(e, $dragDrop.from.index)}}"
-				on:cardPropModify
-				on:cardPropSaved
-				on:cardRemove
-				on:moveCardUp
-				on:moveCardDown
-			/>
-		</div>
-		{:else if $dragDrop.to.col === index_col && $dragDrop.to.index >= cards.length}
+		{#if $dragDrop.to?.index >= cards.length}
 			<div class="animate empty-card"/>
+		{/if}
+		{#if dragAndDropInThisColumn && $dragDrop.from.index < $dragDrop.to.index}
+			<div class="animate not-empty">
+				<Card
+					id={$dragDrop.from.index}
+					id_col={index_col}
+					{catsList}
+					on:mousedown="{(e) => {handleMouseDown(e, $dragDrop.from.index)}}"
+					title={cards[$dragDrop.from.index].title}
+					description={cards[$dragDrop.from.index].description}
+					category={cards[$dragDrop.from.index].category}
+					date={cards[$dragDrop.from.index].date}
+					on:cardPropModify
+					on:cardPropSaved
+					on:cardRemove
+					on:moveCardUp
+					on:moveCardDown
+				/>
+			</div>
 		{/if}
     </div>
     <button class="add-card" on:click={() => {dispatch('addCard', {index:index_col});  }} style:color="{fontSecondary}">
@@ -371,10 +338,6 @@
     .animate{
         animation: growingCard .3s ease-out forwards;
     }
-
-	.noanimate{
-		height:120px
-	}
 
     @keyframes growingCard{
         from{

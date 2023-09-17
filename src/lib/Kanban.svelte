@@ -81,21 +81,17 @@
 		e.preventDefault();
 
 		const {col, card: index} = event.detail;
+		$dragDrop = {};
 
 		const card = $board.columns[col]?.cards?.[index];
-		if (!card) {
-			$dragDrop.from.col = undefined;
-			$dragDrop.to.col = undefined;
-			return;
-		}
+		if (!card) return;
 
 		dispatch('cardDragStart', {card, col, event:event.detail.event});  
 
 		const elem_dragged = document.getElementById(`card-${index}-col-${col}`);
 		if (!elem_dragged) return;
 
-		$dragDrop.from.col = col;
-		$dragDrop.from.index = index;
+		$dragDrop.from = {col, index};
 
 		cOffX = e.clientX - elem_dragged.offsetLeft;
 		cOffY = e.clientY - elem_dragged.offsetTop;
@@ -114,15 +110,14 @@
 		e = e || window.event;
 		e.preventDefault();
 
-		if ($dragDrop.from.col === undefined) return;
-
-		delete $dragDrop.to.col;
+		delete $dragDrop.to;
+		if (!$dragDrop.from) return;
 
 		dispatch('cardDragMove', {card:$dragDrop.from.index, col:$dragDrop.from.col, event:e});  
 
 		const elem_dragged = document.getElementById(`card-${$dragDrop.from.index}-col-${$dragDrop.from.col}`);
 		if (!elem_dragged) {
-			delete $dragDrop.from.col;
+			delete $dragDrop.from;
 			return;
 		}
 
@@ -197,7 +192,7 @@
 		document.removeEventListener('mousemove', cardDragMove);
 		document.removeEventListener('mouseup', cardDragEnd);
 
-		if ($dragDrop.from.col === undefined) {
+		if (!$dragDrop.from) {
 			dispatch('cardDragEnd', {event:e});  
 			return;
 		}
@@ -210,7 +205,7 @@
 		let bool_drag_success = false;
 
 		try {
-			if ($dragDrop.to.col === undefined) return;
+			if (!$dragDrop.to) return;
 
 			let card = $board.columns[$dragDrop.from.col].cards[$dragDrop.from.index];
 			if (useCrdt) card = JSON.parse(JSON.stringify(card));
@@ -220,7 +215,11 @@
 				// Remove the card
 				$board.columns[$dragDrop.from.col].cards.splice($dragDrop.from.index, 1);
 				// Add the card
-				$board.columns[$dragDrop.from.col].cards.splice($dragDrop.from.index-1, 0, card);
+				if ($dragDrop.from.index < $dragDrop.to.index) {
+					$board.columns[$dragDrop.from.col].cards.splice($dragDrop.to.index-1, 0, card);
+				} else {
+					$board.columns[$dragDrop.from.col].cards.splice($dragDrop.to.index, 0, card);
+				}
 			} else {
 				// Remove the card
 				$board.columns[$dragDrop.from.col].cards.splice($dragDrop.from.index, 1);
@@ -251,9 +250,7 @@
 				propsDispatch.new_pos = $dragDrop.to.index;
 			}
 
-			$dragDrop.from.col = undefined;
-			$dragDrop.to.col = undefined;
-
+			$dragDrop = {};
 			dispatch(action_dispatch, propsDispatch);  
 		}
 	}
