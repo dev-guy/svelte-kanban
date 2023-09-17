@@ -19,10 +19,17 @@
 	const globalLang = getLang();
 	const dragDrop = getDragDrop();
 
-	const dropHere = $dragDrop.to?.col === index_col;
-	const dragAndDropHere = dropHere && $dragDrop.from.col === index_col;
-	const dragDownHere = dragAndDropHere && $dragDrop.from.index < $dragDrop.to.index;
-	const dragUpHere = dragAndDropHere && !dragDownHere;
+	let dropHere = false;
+	$: dropHere = $dragDrop.to.col === index_col;
+
+	let dragAndDropHere = false;
+	$: dragAndDropHere = dropHere && $dragDrop.from.col === index_col;
+
+	let dragDownHere = false;
+	$: dragDownHere = dragAndDropHere && $dragDrop.from.card < $dragDrop.to.card;
+
+	let dragUpHere = false;
+	$: dragUpHere = dragAndDropHere && !dragDownHere;
 
 	let numCards = 0;
 	$: numCards = cards.length + (dragAndDropHere ? 0 : Number(dropHere));
@@ -89,56 +96,29 @@
 
     <div class="content"> 
 		{#each cards as card, index}
-			{#if dragDownHere && $dragDrop.from.index === index}
-				<!-- svelte-ignore empty-block -->
-			{:else}
-				{#if dropHere && $dragDrop.to.index === index}
-				  <div class="animate empty-card"/>
-				{/if}
-				<div class="animate not-empty">
-					<Card
-						id={index}
-						id_col={index_col}
-						{catsList}
-						on:mousedown="{(e) => {handleMouseDown(e, index)}}"
-						title={card.title}
-						description={card.description}
-						category={card.category}
-						date={card.date}
-						on:cardPropModify
-						on:cardPropSaved
-						on:cardRemove
-						on:moveCardUp
-						on:moveCardDown
-						topoffset={dragUpHere && 120*(1 + $dragDrop.from.index - $dragDrop.to.index)
-						|| null}
-					/>
-				</div>
+			{#if dropHere && $dragDrop.to.card === index}
+				<div class="animate empty-card"/>
 			{/if}
-		{/each}
-		{#if dropHere && $dragDrop.to.index >= cards.length}
-			<div class="animate empty-card"/>
-		{/if}
-		{#if dragDownHere}
-		down
-			<div class="animate not-empty" >
+			<div class="animate not-empty">
 				<Card
-					id={$dragDrop.from.index}
+					id={index}
 					id_col={index_col}
 					{catsList}
-					on:mousedown="{(e) => {handleMouseDown(e, $dragDrop.from.index)}}"
-					title={cards[$dragDrop.from.index].title}
-					description={cards[$dragDrop.from.index].description}
-					category={cards[$dragDrop.from.index].category}
-					date={cards[$dragDrop.from.index].date}
+					on:mousedown="{(e) => {handleMouseDown(e, index)}}"
+					title={card.title}
+					description={card.description}
+					category={card.category}
+					date={card.date}
 					on:cardPropModify
 					on:cardPropSaved
 					on:cardRemove
 					on:moveCardUp
 					on:moveCardDown
-					topoffset={-120*(1 + $dragDrop.to.index - $dragDrop.from.index)}
 				/>
 			</div>
+		{/each}
+		{#if dropHere && $dragDrop.to.card >= cards.length}
+			<div class="animate empty-card"/>
 		{/if}
     </div>
     <button class="add-card" on:click={() => {dispatch('addCard', {index:index_col});  }} style:color="{fontSecondary}">

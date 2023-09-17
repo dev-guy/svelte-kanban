@@ -51,7 +51,6 @@
     export let category = {label:'default', bgColor:'gray', color:'white'};
     export let date;
     export let catsList;
-	export let topoffset = 0;
 
     function handleKeyUp(event, source:string){
         if(event.keyCode == 13) saveProp(source);
@@ -67,7 +66,7 @@
 
     })
 </script>
-<div id="card-{id}-col-{id_col}" style="margin-top:-{topoffset}px; box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;" class="card draggable" draggable=true on:mousedown>
+<div id="card-{id}-col-{id_col}" style="box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;" class="card draggable" draggable=true on:mousedown>
     <div class="card-part">
         <div style="flex:1; display:flex;justify-content:flex-start; align-items:center;">
             <button class="card-category" style="background:{category.bgColor}; color:{category.color}" on:click={()=>{bool_show_cats_list = !bool_show_cats_list}}>{category.label}</button>
