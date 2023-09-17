@@ -19,14 +19,13 @@
 	const globalLang = getLang();
 	const dragDrop = getDragDrop();
 
-	let dragAndDropInThisColumn = false;
-	$: dragAndDropInThisColumn = !!($dragDrop.from && $dragDrop.from.col === $dragDrop.to?.col && $dragDrop.from.col === index_col);
-
-	let dropInThisColumn = false;
-	$: dropInThisColumn = $dragDrop.to?.col === index_col;
+	const dropHere = $dragDrop.to?.col === index_col;
+	const dragAndDropHere = dropHere && $dragDrop.from.col === index_col;
+	const dragDownHere = dragAndDropHere && $dragDrop.from.index < $dragDrop.to.index;
+	const dragUpHere = dragAndDropHere && !dragDownHere;
 
 	let numCards = 0;
-	$: numCards = cards.length + (dragAndDropInThisColumn ? 0 : Number(dropInThisColumn));
+	$: numCards = cards.length + (dragAndDropHere ? 0 : Number(dropHere));
 
     const dispatch = createEventDispatcher();
 
@@ -90,10 +89,10 @@
 
     <div class="content"> 
 		{#each cards as card, index}
-			{#if dragAndDropInThisColumn && $dragDrop.from.index === index && $dragDrop.from.index < $dragDrop.to.index}
+			{#if dragDownHere && $dragDrop.from.index === index}
 				<!-- svelte-ignore empty-block -->
 			{:else}
-				{#if dropInThisColumn && $dragDrop.to.index === index}
+				{#if dropHere && $dragDrop.to.index === index}
 				  <div class="animate empty-card"/>
 				{/if}
 				<div class="animate not-empty">
@@ -111,14 +110,17 @@
 						on:cardRemove
 						on:moveCardUp
 						on:moveCardDown
+						topoffset={dragUpHere && 120*(1 + $dragDrop.from.index - $dragDrop.to.index)
+						|| null}
 					/>
 				</div>
 			{/if}
 		{/each}
-		{#if dropInThisColumn && $dragDrop.to.index >= cards.length}
+		{#if dropHere && $dragDrop.to.index >= cards.length}
 			<div class="animate empty-card"/>
 		{/if}
-		{#if dragAndDropInThisColumn && $dragDrop.from.index < $dragDrop.to.index}
+		{#if dragDownHere}
+		down
 			<div class="animate not-empty" >
 				<Card
 					id={$dragDrop.from.index}
@@ -134,7 +136,7 @@
 					on:cardRemove
 					on:moveCardUp
 					on:moveCardDown
-					topoffset={120*($dragDrop.to.index - $dragDrop.from.index)+60}
+					topoffset={-120*(1 + $dragDrop.to.index - $dragDrop.from.index)}
 				/>
 			</div>
 		{/if}
