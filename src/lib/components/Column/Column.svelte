@@ -22,11 +22,8 @@
 	let dropHere = false;
 	$: dropHere = $dragDrop.to.col === index_col;
 
-	let dragAndDropHere = false;
-	$: dragAndDropHere = $dragDrop.from.col === index_col && $dragDrop.to.col === index_col;
-
 	let numCards = 0;
-	$: numCards = cards.length + (dragAndDropHere ? 0 : Number(dropHere));
+	$: numCards = cards.length + (dropHere && $dragDrop.from.col === index_col ? 0 : Number(dropHere));
 
     const dispatch = createEventDispatcher();
 

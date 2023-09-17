@@ -19,7 +19,8 @@
 	const globalLang = getLang(lang);
 	const dragDrop = getDragDrop();
 
-	$: console.log(JSON.stringify($dragDrop,null,2))
+	// Uncomment this to troubleshoot drag and drop
+	// $: console.log(JSON.stringify($dragDrop,null,2))
 
 	// Default categories
 	let catsList = [{
