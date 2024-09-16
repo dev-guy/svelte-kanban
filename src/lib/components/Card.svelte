@@ -1,14 +1,17 @@
 <script lang="ts">
     import {createEventDispatcher, onMount} from 'svelte';
-    import {columns, globalLang} from '$lib/stores/store.js';
+	import {getBoard, getLang} from '$lib/stores';
+
+	const board = getBoard();
+	const globalLang = getLang();
 
     let bool_show_cats_list = false;
     const dispatch = createEventDispatcher();
 
     function removeCard(e){
-		const column_temp = $columns[id_col];
-		column_temp.slots.splice(id, 1);
-		$columns[id_col].slots = [... column_temp.slots];
+		const column_temp = $board.columns[id_col];
+		column_temp.cards.splice(id, 1);
+		$board = $board;
         dispatch('cardRemove', {});  
     }
 
@@ -30,24 +33,24 @@
         document.getElementById(modify).style.display = '';
         document.getElementById(input).style.display = 'none';
         document.getElementById(save).style.display = 'none';
-        $columns[id_col].slots[id][prop] = (<HTMLInputElement>document.getElementById(input)).value;
+        $board.columns[id_col].cards[id][prop] = (<HTMLInputElement>document.getElementById(input)).value;
         dispatch('cardPropSaved', {prop, col:id_col, card:id, value:(<HTMLInputElement>document.getElementById(input)).value});  
     }
  
     function changeCategory(cat_index:number){
-        const oldValue = $columns[id_col].slots[id].category;
-        $columns[id_col].slots[id].category = categories_list[cat_index];
+        const oldValue = $board.columns[id_col].cards[id].category;
+        $board.columns[id_col].cards[id].category = catsList[cat_index];
         bool_show_cats_list = false;
-        dispatch('cardPropSaved', {prop:'category', col:id_col, card:id, oldValue, newValue:categories_list[cat_index]}); 
+        dispatch('cardPropSaved', {prop:'category', col:id_col, card:id, oldValue, newValue:catsList[cat_index]}); 
     }
 
     export let id:number;
     export let id_col:number;
     export let title = $globalLang.getStr('NewCard');
-    export let description = 'empty';
+    export let description;
     export let category = {label:'default', bgColor:'gray', color:'white'};
-    export let date = '01/01/2021';
-    export let categories_list;
+    export let date;
+    export let catsList;
 
     function handleKeyUp(event, source:string){
         if(event.keyCode == 13) saveProp(source);
@@ -63,15 +66,13 @@
 
     })
 </script>
-
-
 <div id="card-{id}-col-{id_col}" style="box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;" class="card draggable" draggable=true on:mousedown>
     <div class="card-part">
         <div style="flex:1; display:flex;justify-content:flex-start; align-items:center;">
             <button class="card-category" style="background:{category.bgColor}; color:{category.color}" on:click={()=>{bool_show_cats_list = !bool_show_cats_list}}>{category.label}</button>
             {#if bool_show_cats_list}
                 <div class="categories-list">
-                    {#each categories_list as cat_temp, cat_index}
+                    {#each catsList as cat_temp, cat_index}
                         <button class="category-button" on:click={()=>{changeCategory(cat_index)}}>
                             <div class="category-circle" style="background-color:{cat_temp.bgColor}"></div>
                             {cat_temp.label}

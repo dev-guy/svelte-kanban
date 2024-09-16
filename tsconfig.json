@@ -9,11 +9,9 @@
 		"skipLibCheck": true,
 		"sourceMap": true,
 		"strict": true,
-		"moduleResolution": "NodeNext",
 		"paths": {
 			"$lib": ["./src/lib"],
-			"$lib/*": ["./src/lib/*"],
-			"$stores/*": ["./src/lib/stores/*"]
+			"$lib/*": ["./src/lib/*"]
 		}
 	}
 }
